@@ -3,32 +3,30 @@
   "name": "webapp",
   "compatibility_date": "2025-08-30",
   "pages_build_output_dir": "./dist",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
+  "compatibility_flags": ["nodejs_compat"],
+  
+  // Variáveis de desenvolvimento (serão sobrescritas por secrets em produção)
+  "vars": {
+    "AI_API_PROVIDER": "demo",
+    "AI_MODEL_DEFAULT": "V_3",
+    "MAX_IMAGES_PER_REQUEST": "10"
+  }
+  
+  // Para produção, use secrets em vez de vars:
+  // npx wrangler pages secret put IDEOGRAM_API_KEY --project-name webapp
+  // npx wrangler pages secret put AI_API_PROVIDER --project-name webapp
+  
+  // Descomente se precisar de storage:
   // "kv_namespaces": [
   //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  //     "binding": "CACHE",
+  //     "id": "your-kv-namespace-id"
   //   }
   // ],
   // "r2_buckets": [
   //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
+  //     "binding": "IMAGES",
+  //     "bucket_name": "webapp-images"
   //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // }
+  // ]
 }

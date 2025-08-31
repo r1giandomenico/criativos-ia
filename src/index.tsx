@@ -237,8 +237,14 @@ app.get('/', (c) => {
 // API para geração de imagens
 app.post('/api/generate', async (c) => {
   try {
+    const { env } = c // Acessar variáveis de ambiente no Cloudflare
     const { category, nationality, style, socialTheme, aspectRatio, quantity } = await c.req.json()
     
+    // Validar limites
+    if (quantity > 10) {
+      return c.json({ success: false, error: 'Maximum 10 images per request' }, 400)
+    }
+
     let basePrompt = ''
     if (category === 'women') {
       const womanType = WOMAN_TYPES[nationality] || WOMAN_TYPES.brazilian
@@ -285,41 +291,122 @@ app.post('/api/generate', async (c) => {
       prompts.push(finalPrompt + technicalSpecs)
     }
 
-    // Para demonstração, vou usar placeholders de alta qualidade
-    // Na implementação real, você substituiria por sua API de geração
-    const results = await Promise.all(prompts.map(async (prompt, index) => {
-      // Aqui você faria a chamada para sua API de geração de imagem
-      // Exemplo: const imageUrl = await generateImageWithAI(prompt, aspectRatio)
+    // Verificar se as chaves de API estão configuradas
+    const useRealAPI = env?.AI_API_PROVIDER && (
+      env.IDEOGRAM_API_KEY || 
+      env.OPENAI_API_KEY || 
+      env.FLUX_API_KEY || 
+      env.STABILITY_API_KEY
+    )
+
+    const results = []
+
+    if (useRealAPI) {
+      // INTEGRAÇÃO COM API REAL
+      const { generateImageWithAI, validateAIConfig } = await import('./ai-integration')
+      const aiConfig = validateAIConfig(env)
       
-      // Por enquanto, usando placeholder com diferentes categorias para demonstração
-      let placeholderUrl = ''
-      if (category === 'women') {
-        const womanCategories = ['fashion', 'portrait', 'beauty', 'lifestyle', 'model']
-        const randomCategory = womanCategories[Math.floor(Math.random() * womanCategories.length)]
-        placeholderUrl = `https://picsum.photos/seed/${Date.now()}_${index}_${randomCategory}/800/1200`
-      } else {
-        const socialCategories = ['people', 'community', 'education', 'healthcare', 'technology']
-        const randomCategory = socialCategories[Math.floor(Math.random() * socialCategories.length)]
-        placeholderUrl = `https://picsum.photos/seed/${Date.now()}_${index}_${randomCategory}/800/1200`
+      if (!aiConfig) {
+        return c.json({ 
+          success: false, 
+          error: 'AI API not properly configured. Please check your environment variables.' 
+        }, 500)
       }
 
-      return {
-        id: `img_${Date.now()}_${index}`,
-        prompt,
-        url: placeholderUrl,
-        aspectRatio,
-        category,
-        nationality: nationality || 'N/A',
-        style: style || socialTheme || 'N/A',
-        timestamp: new Date().toISOString(),
-        downloadUrl: placeholderUrl // Para download direto
-      }
-    }))
+      console.log(`Using ${aiConfig.provider} API for ${quantity} images`)
 
-    return c.json({ success: true, images: results, totalGenerated: quantity })
+      // Gerar imagens com API real
+      for (let i = 0; i < prompts.length; i++) {
+        try {
+          const result = await generateImageWithAI(aiConfig, {
+            prompt: prompts[i],
+            aspectRatio: aspectRatio,
+            model: aiConfig.model
+          })
+
+          if (result.success && result.imageUrl) {
+            results.push({
+              id: `ai_${Date.now()}_${i}`,
+              prompt: prompts[i],
+              url: result.imageUrl,
+              aspectRatio,
+              category,
+              nationality: nationality || 'N/A',
+              style: style || socialTheme || 'N/A',
+              timestamp: new Date().toISOString(),
+              downloadUrl: result.imageUrl,
+              provider: aiConfig.provider,
+              model: aiConfig.model
+            })
+          } else {
+            console.error(`Failed to generate image ${i + 1}:`, result.error)
+            // Continuar com as outras imagens mesmo se uma falhar
+          }
+
+          // Pequeno delay para evitar rate limiting
+          if (i < prompts.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1000))
+          }
+
+        } catch (error) {
+          console.error(`Error generating image ${i + 1}:`, error)
+          // Continuar com as outras imagens
+        }
+      }
+
+      if (results.length === 0) {
+        return c.json({ 
+          success: false, 
+          error: 'Failed to generate any images. Please check your API configuration and try again.' 
+        }, 500)
+      }
+
+    } else {
+      // MODO DEMO COM PLACEHOLDERS
+      console.log('Using demo mode with placeholder images')
+      
+      for (let i = 0; i < prompts.length; i++) {
+        let placeholderUrl = ''
+        if (category === 'women') {
+          const womanCategories = ['fashion', 'portrait', 'beauty', 'lifestyle', 'model']
+          const randomCategory = womanCategories[Math.floor(Math.random() * womanCategories.length)]
+          placeholderUrl = `https://picsum.photos/seed/${Date.now()}_${i}_${randomCategory}/800/1200`
+        } else {
+          const socialCategories = ['people', 'community', 'education', 'healthcare', 'technology']
+          const randomCategory = socialCategories[Math.floor(Math.random() * socialCategories.length)]
+          placeholderUrl = `https://picsum.photos/seed/${Date.now()}_${i}_${randomCategory}/800/1200`
+        }
+
+        results.push({
+          id: `demo_${Date.now()}_${i}`,
+          prompt: prompts[i],
+          url: placeholderUrl,
+          aspectRatio,
+          category,
+          nationality: nationality || 'N/A',
+          style: style || socialTheme || 'N/A',
+          timestamp: new Date().toISOString(),
+          downloadUrl: placeholderUrl,
+          provider: 'demo',
+          model: 'placeholder'
+        })
+
+        // Simular tempo de processamento
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    }
+
+    return c.json({ 
+      success: true, 
+      images: results, 
+      totalGenerated: results.length,
+      mode: useRealAPI ? 'ai' : 'demo',
+      provider: useRealAPI ? env.AI_API_PROVIDER : 'placeholder'
+    })
+
   } catch (error) {
     console.error('Erro na geração:', error)
-    return c.json({ success: false, error: error.message }, 400)
+    return c.json({ success: false, error: error.message }, 500)
   }
 })
 

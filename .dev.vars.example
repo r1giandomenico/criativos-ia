@@ -1,0 +1,18 @@
+# Arquivo de exemplo para variáveis de ambiente
+# Copie para .dev.vars e preencha com suas chaves reais
+
+# API de Geração de Imagem (escolha uma)
+IDEOGRAM_API_KEY=sua_chave_ideogram_aqui
+FLUX_API_KEY=sua_chave_flux_aqui  
+OPENAI_API_KEY=sua_chave_openai_aqui
+STABILITY_API_KEY=sua_chave_stability_aqui
+
+# Configurações da API escolhida
+AI_API_PROVIDER=ideogram
+AI_API_ENDPOINT=https://api.ideogram.ai/generate
+AI_MODEL_DEFAULT=V_3
+
+# Configurações opcionais
+MAX_IMAGES_PER_REQUEST=10
+CACHE_DURATION_MINUTES=60
+RATE_LIMIT_PER_MINUTE=30
