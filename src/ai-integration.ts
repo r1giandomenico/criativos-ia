@@ -97,47 +97,63 @@ const AI_PROVIDERS = {
     defaultModel: 'core',
     headers: (apiKey: string) => ({
       'Authorization': `Bearer ${apiKey}`,
-      'Accept': 'application/json'  // Mudança para JSON response
+      'Accept': 'image/*'
+      // Não incluir Content-Type para FormData
     }),
     formatRequest: (prompt: string, aspectRatio: string, model: string) => {
-      // Stability AI agora usa JSON em vez de FormData para compatibilidade
+      // Stability AI requer FormData
+      const formData = new FormData()
+      formData.append('prompt', prompt)
+      formData.append('output_format', 'jpeg')
+      
+      // Mapear aspect ratio
       const ratioMap: Record<string, string> = {
         '1:1': '1:1',
-        '16:9': '16:9', 
+        '16:9': '16:9',
         '9:16': '9:16',
         '4:3': '4:3'
       }
+      formData.append('aspect_ratio', ratioMap[aspectRatio] || '1:1')
       
-      return {
-        prompt: prompt,
-        aspect_ratio: ratioMap[aspectRatio] || '1:1',
-        output_format: 'jpeg',
-        model: model || 'core'
-      }
+      return formData
     },
-    parseResponse: (data: any) => {
-      // Stability AI retorna URL diretamente ou base64
-      if (data.image) {
-        // Se retornar base64, converter para data URL
-        const imageUrl = data.image.startsWith('data:') 
-          ? data.image 
-          : `data:image/jpeg;base64,${data.image}`
-        return {
-          success: true,
-          imageUrl: imageUrl
-        }
-      } else if (data.artifacts && data.artifacts[0]) {
-        // Formato alternativo da API
-        const artifact = data.artifacts[0]
-        const imageUrl = artifact.base64 
-          ? `data:image/jpeg;base64,${artifact.base64}`
-          : artifact.url || null
-        return {
-          success: true,
-          imageUrl: imageUrl
+    parseResponse: async (response: Response) => {
+      // Stability AI retorna imagem binária
+      if (response.ok) {
+        try {
+          const arrayBuffer = await response.arrayBuffer()
+          // Converter ArrayBuffer para base64 de forma segura
+          const bytes = new Uint8Array(arrayBuffer)
+          let binary = ''
+          const chunkSize = 8192
+          
+          for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, i + chunkSize)
+            binary += String.fromCharCode.apply(null, Array.from(chunk))
+          }
+          
+          const base64 = btoa(binary)
+          
+          return {
+            success: true,
+            imageUrl: `data:image/jpeg;base64,${base64}`
+          }
+        } catch (error) {
+          console.error('Error processing image data:', error)
+          return { success: false, error: 'Failed to process image data' }
         }
       }
-      return { success: false, error: 'No image data in response' }
+      
+      // Em caso de erro HTTP, tentar ler como JSON
+      try {
+        const errorData = await response.json()
+        return { 
+          success: false, 
+          error: errorData.errors ? errorData.errors.join(', ') : 'Failed to generate image' 
+        }
+      } catch {
+        return { success: false, error: `HTTP ${response.status}: ${response.statusText}` }
+      }
     }
   }
 }
@@ -168,7 +184,7 @@ export async function generateImageWithAI(
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers,
-      body: JSON.stringify(requestBody)
+      body: requestBody instanceof FormData ? requestBody : JSON.stringify(requestBody)
     })
 
     if (!response.ok) {
@@ -180,9 +196,15 @@ export async function generateImageWithAI(
       }
     }
 
-    // Parse response - todos os providers agora usam JSON
-    const data = await response.json()
-    return provider.parseResponse(data)
+    // Parse response baseado no provider
+    if (config.provider === 'stability') {
+      // Stability AI tem parseResponse especial que lida com Response diretamente
+      return await provider.parseResponse(response)
+    } else {
+      // Outros providers usam JSON
+      const data = await response.json()
+      return provider.parseResponse(data)
+    }
 
   } catch (error) {
     console.error('Image generation error:', error)
