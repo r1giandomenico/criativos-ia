@@ -34,184 +34,204 @@ const SOCIAL_BENEFIT_THEMES = {
 }
 
 app.get('/', (c) => {
-  return c.render(
-    <div class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-bold text-white text-center mb-8">
-          🎨 Gerador de Criativos para Meta Ads
-        </h1>
-        
-        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Painel de Controle */}
-          <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-            <h2 class="text-2xl font-bold text-white mb-6">⚙️ Configurações</h2>
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🎨 Gerador de Criativos para Meta Ads</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <link href="/static/style.css" rel="stylesheet">
+    </head>
+    <body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <div class="container mx-auto px-4 py-8">
+            <h1 class="text-4xl font-bold text-white text-center mb-8">
+                🎨 Gerador de Criativos para Meta Ads
+            </h1>
             
-            <div class="space-y-6">
-              {/* Categoria */}
-              <div>
-                <label class="block text-white font-semibold mb-3">Categoria:</label>
-                <div class="grid grid-cols-2 gap-2">
-                  <button 
-                    id="category-women" 
-                    class="category-btn bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-all active"
-                    onclick="selectCategory('women')"
-                  >
-                    👩 Mulheres
-                  </button>
-                  <button 
-                    id="category-social" 
-                    class="category-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all"
-                    onclick="selectCategory('social')"
-                  >
-                    🤝 Benefício Social
-                  </button>
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Painel de Controle -->
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                    <h2 class="text-2xl font-bold text-white mb-6">⚙️ Configurações</h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Categoria -->
+                        <div>
+                            <label class="block text-white font-semibold mb-3">Categoria:</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button 
+                                    id="category-women" 
+                                    class="category-btn bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-all active"
+                                    onclick="selectCategory('women')"
+                                >
+                                    👩 Mulheres
+                                </button>
+                                <button 
+                                    id="category-social" 
+                                    class="category-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-all"
+                                    onclick="selectCategory('social')"
+                                >
+                                    🤝 Benefício Social
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Configurações para Mulheres -->
+                        <div id="women-config" class="space-y-4">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Nacionalidade:</label>
+                                <select id="nationality" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                    <option value="brazilian">Brasileira</option>
+                                    <option value="arabic">Árabe</option>
+                                    <option value="mexican">Mexicana</option>
+                                    <option value="american">Americana</option>
+                                    <option value="european">Europeia</option>
+                                    <option value="asian">Asiática</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Estilo:</label>
+                                <select id="style" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                    <option value="sexy">Sexy</option>
+                                    <option value="bikini">Bikini</option>
+                                    <option value="casual">Casual</option>
+                                    <option value="formal">Formal</option>
+                                    <option value="fitness">Fitness</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações para Benefício Social -->
+                        <div id="social-config" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-white font-semibold mb-2">Tema Social:</label>
+                                <select id="social-theme" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                    <option value="education">Educação</option>
+                                    <option value="health">Saúde</option>
+                                    <option value="environment">Meio Ambiente</option>
+                                    <option value="community">Comunidade</option>
+                                    <option value="technology">Tecnologia</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Configurações Gerais -->
+                        <div>
+                            <label class="block text-white font-semibold mb-2">Formato:</label>
+                            <select id="aspect-ratio" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                <option value="1:1">Quadrado (1:1) - Instagram Feed</option>
+                                <option value="9:16">Vertical (9:16) - Stories/Reels</option>
+                                <option value="16:9">Horizontal (16:9) - Facebook</option>
+                                <option value="4:3">Retrato (4:3) - Posts</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-white font-semibold mb-2">Quantidade:</label>
+                            <select id="quantity" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                <option value="1">1 imagem</option>
+                                <option value="3">3 imagens</option>
+                                <option value="5">5 imagens</option>
+                                <option value="10">10 imagens (massa)</option>
+                            </select>
+                        </div>
+
+                        <!-- Botões -->
+                        <div class="space-y-3">
+                            <button 
+                                id="generate-btn"
+                                onclick="generateImages()"
+                                class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg"
+                            >
+                                🎨 Gerar Imagens
+                            </button>
+                            
+                            <div class="grid grid-cols-2 gap-2">
+                                <button 
+                                    onclick="downloadAllImages()"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
+                                >
+                                    📦 Download Todas
+                                </button>
+                                <button 
+                                    onclick="exportPrompts()"
+                                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
+                                >
+                                    📄 Exportar Prompts
+                                </button>
+                            </div>
+                            
+                            <button 
+                                onclick="clearGallery()"
+                                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+                            >
+                                🗑️ Limpar Galeria
+                            </button>
+                        </div>
+                    </div>
                 </div>
-              </div>
 
-              {/* Configurações para Mulheres */}
-              <div id="women-config" class="space-y-4">
-                <div>
-                  <label class="block text-white font-semibold mb-2">Nacionalidade:</label>
-                  <select id="nationality" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
-                    {Object.entries(WOMAN_TYPES).map(([key, value]) => (
-                      <option value={key}>{value}</option>
-                    ))}
-                  </select>
+                <!-- Galeria -->
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                    <h2 class="text-2xl font-bold text-white mb-6">🖼️ Galeria de Criativos</h2>
+                    
+                    <div id="loading" class="hidden text-center py-8">
+                        <div class="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white mx-auto mb-4"></div>
+                        <p class="text-white">Gerando imagens...</p>
+                    </div>
+
+                    <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                        <div class="col-span-full text-center text-white/60 py-8">
+                            <div class="text-6xl mb-4">🎨</div>
+                            <p>Suas imagens aparecerão aqui</p>
+                            <p class="text-sm mt-2">Configure os parâmetros e clique em "Gerar Imagens"</p>
+                        </div>
+                    </div>
+
+                    <div id="stats" class="mt-4 p-3 bg-white/10 rounded-lg text-sm text-white/80 hidden">
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div>📊 Total: <span id="total-count" class="font-bold">0</span></div>
+                            <div>👩 Mulheres: <span id="women-count" class="font-bold">0</span></div>
+                            <div>🤝 Social: <span id="social-count" class="font-bold">0</span></div>
+                            <div>⏱️ Última: <span id="last-generated" class="font-bold">-</span></div>
+                        </div>
+                    </div>
                 </div>
-
-                <div>
-                  <label class="block text-white font-semibold mb-2">Estilo:</label>
-                  <select id="style" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
-                    {Object.entries(STYLES).map(([key, value]) => (
-                      <option value={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Configurações para Benefício Social */}
-              <div id="social-config" class="space-y-4 hidden">
-                <div>
-                  <label class="block text-white font-semibold mb-2">Tema Social:</label>
-                  <select id="social-theme" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
-                    {Object.entries(SOCIAL_BENEFIT_THEMES).map(([key, value]) => (
-                      <option value={key}>{key.charAt(0).toUpperCase() + key.slice(1)}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Configurações Gerais */}
-              <div>
-                <label class="block text-white font-semibold mb-2">Formato:</label>
-                <select id="aspect-ratio" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
-                  <option value="1:1">Quadrado (1:1) - Instagram Feed</option>
-                  <option value="9:16">Vertical (9:16) - Stories/Reels</option>
-                  <option value="16:9">Horizontal (16:9) - Facebook</option>
-                  <option value="4:3">Retrato (4:3) - Posts</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-white font-semibold mb-2">Quantidade:</label>
-                <select id="quantity" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
-                  <option value="1">1 imagem</option>
-                  <option value="3">3 imagens</option>
-                  <option value="5">5 imagens</option>
-                  <option value="10">10 imagens (massa)</option>
-                </select>
-              </div>
-
-              {/* Botões */}
-              <div class="space-y-3">
-                <button 
-                  id="generate-btn"
-                  onclick="generateImages()"
-                  class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-all transform hover:scale-105 shadow-lg"
-                >
-                  🎨 Gerar Imagens
-                </button>
-                
-                <div class="grid grid-cols-2 gap-2">
-                  <button 
-                    onclick="downloadAllImages()"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
-                  >
-                    📦 Download Todas
-                  </button>
-                  <button 
-                    onclick="exportPrompts()"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
-                  >
-                    📄 Exportar Prompts
-                  </button>
-                </div>
-                
-                <button 
-                  onclick="clearGallery()"
-                  class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-all"
-                >
-                  🗑️ Limpar Galeria
-                </button>
-              </div>
             </div>
-          </div>
 
-          {/* Galeria */}
-          <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-            <h2 class="text-2xl font-bold text-white mb-6">🖼️ Galeria de Criativos</h2>
-            
-            <div id="loading" class="hidden text-center py-8">
-              <div class="animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white mx-auto mb-4"></div>
-              <p class="text-white">Gerando imagens...</p>
+            <!-- Seção de Dicas -->
+            <div class="max-w-4xl mx-auto mt-8 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                <h3 class="text-xl font-bold text-white mb-4">💡 Dicas para Meta Ads</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-white/90">
+                    <div>
+                        <h4 class="font-semibold mb-2">✅ Melhores Práticas:</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Use imagens de alta qualidade</li>
+                            <li>• Teste diferentes nacionalidades</li>
+                            <li>• Varie os estilos para encontrar o que converte</li>
+                            <li>• Stories funcionam bem no formato 9:16</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">📊 Estratégia de Teste:</h4>
+                        <ul class="text-sm space-y-1">
+                            <li>• Gere múltiplas variações</li>
+                            <li>• Teste A/B com diferentes estilos</li>
+                            <li>• Monitore métricas de engajamento</li>
+                            <li>• Adapte baseado na performance</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-
-            <div id="gallery" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-              <div class="text-center text-white/60 py-8">
-                Suas imagens aparecerão aqui
-              </div>
-            </div>
-
-            <div id="stats" class="mt-4 p-3 bg-white/10 rounded-lg text-sm text-white/80 hidden">
-              <div class="grid grid-cols-2 gap-2 text-xs">
-                <div>📊 Total: <span id="total-count" class="font-bold">0</span></div>
-                <div>👩 Mulheres: <span id="women-count" class="font-bold">0</span></div>
-                <div>🤝 Social: <span id="social-count" class="font-bold">0</span></div>
-                <div>⏱️ Última: <span id="last-generated" class="font-bold">-</span></div>
-              </div>
-            </div>
-          </div>
         </div>
 
-        {/* Seção de Dicas */}
-        <div class="max-w-4xl mx-auto mt-8 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-          <h3 class="text-xl font-bold text-white mb-4">💡 Dicas para Meta Ads</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-white/90">
-            <div>
-              <h4 class="font-semibold mb-2">✅ Melhores Práticas:</h4>
-              <ul class="text-sm space-y-1">
-                <li>• Use imagens de alta qualidade</li>
-                <li>• Teste diferentes nacionalidades</li>
-                <li>• Varie os estilos para encontrar o que converte</li>
-                <li>• Stories funcionam bem no formato 9:16</li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-semibold mb-2">📊 Estratégia de Teste:</h4>
-              <ul class="text-sm space-y-1">
-                <li>• Gere múltiplas variações</li>
-                <li>• Teste A/B com diferentes estilos</li>
-                <li>• Monitore métricas de engajamento</li>
-                <li>• Adapte baseado na performance</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <script src="/static/app.js"></script>
-    </div>
-  )
+        <script src="/static/app.js"></script>
+    </body>
+    </html>
+  `)
 })
 
 // API para geração de imagens
