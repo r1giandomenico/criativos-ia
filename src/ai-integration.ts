@@ -97,35 +97,47 @@ const AI_PROVIDERS = {
     defaultModel: 'core',
     headers: (apiKey: string) => ({
       'Authorization': `Bearer ${apiKey}`,
-      'Accept': 'image/*'
+      'Accept': 'application/json'  // Mudança para JSON response
     }),
     formatRequest: (prompt: string, aspectRatio: string, model: string) => {
-      const formData = new FormData()
-      formData.append('prompt', prompt)
-      formData.append('output_format', 'jpeg')
-      
-      // Mapear aspect ratio
+      // Stability AI agora usa JSON em vez de FormData para compatibilidade
       const ratioMap: Record<string, string> = {
         '1:1': '1:1',
-        '16:9': '16:9',
+        '16:9': '16:9', 
         '9:16': '9:16',
         '4:3': '4:3'
       }
-      formData.append('aspect_ratio', ratioMap[aspectRatio] || '1:1')
       
-      return formData
+      return {
+        prompt: prompt,
+        aspect_ratio: ratioMap[aspectRatio] || '1:1',
+        output_format: 'jpeg',
+        model: model || 'core'
+      }
     },
-    parseResponse: async (response: Response) => {
-      if (response.ok) {
-        const blob = await response.blob()
-        // Para Stability AI, você precisaria fazer upload do blob para um storage
-        // e retornar a URL. Por simplicidade, vou simular:
+    parseResponse: (data: any) => {
+      // Stability AI retorna URL diretamente ou base64
+      if (data.image) {
+        // Se retornar base64, converter para data URL
+        const imageUrl = data.image.startsWith('data:') 
+          ? data.image 
+          : `data:image/jpeg;base64,${data.image}`
         return {
           success: true,
-          imageUrl: URL.createObjectURL(blob) // Temporário - implemente upload real
+          imageUrl: imageUrl
+        }
+      } else if (data.artifacts && data.artifacts[0]) {
+        // Formato alternativo da API
+        const artifact = data.artifacts[0]
+        const imageUrl = artifact.base64 
+          ? `data:image/jpeg;base64,${artifact.base64}`
+          : artifact.url || null
+        return {
+          success: true,
+          imageUrl: imageUrl
         }
       }
-      return { success: false, error: 'Failed to generate image' }
+      return { success: false, error: 'No image data in response' }
     }
   }
 }
@@ -156,7 +168,7 @@ export async function generateImageWithAI(
     const response = await fetch(config.endpoint, {
       method: 'POST',
       headers,
-      body: requestBody instanceof FormData ? requestBody : JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody)
     })
 
     if (!response.ok) {
@@ -168,13 +180,9 @@ export async function generateImageWithAI(
       }
     }
 
-    // Parse response based on provider
-    if (config.provider === 'stability') {
-      return await provider.parseResponse(response)
-    } else {
-      const data = await response.json()
-      return provider.parseResponse(data)
-    }
+    // Parse response - todos os providers agora usam JSON
+    const data = await response.json()
+    return provider.parseResponse(data)
 
   } catch (error) {
     console.error('Image generation error:', error)

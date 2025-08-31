@@ -37,7 +37,7 @@ const API_PROVIDERS = {
   },
   stability: {
     name: '🎨 Stability AI',
-    description: 'Controle avançado e modelos customizáveis. Ideal para ajustes específicos.',
+    description: 'Controle avançado e modelos customizáveis. Em fase beta - pode ter limitações.',
     signupUrl: 'https://platform.stability.ai/account/keys',
     signupText: 'Gerar chave na Stability AI',
     keyFormat: 'Ex: sk-xxxxxxxx',

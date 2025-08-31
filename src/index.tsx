@@ -307,7 +307,7 @@ app.get('/', (c) => {
                                 >
                                     <div class="font-bold text-white">🎨 Stability AI</div>
                                     <div class="text-sm text-white/70">Customizável • ~$0.04/img</div>
-                                    <div class="text-xs text-white/60 mt-1">Controle avançado</div>
+                                    <div class="text-xs text-white/60 mt-1">Controle avançado (Beta)</div>
                                 </button>
                             </div>
                         </div>
@@ -414,8 +414,19 @@ app.get('/', (c) => {
                             </button>
                         </div>
 
+                        <!-- Dicas de APIs -->
+                        <div class="mt-6 p-4 bg-green-500/20 rounded-lg border border-green-500/30">
+                            <h5 class="text-green-200 font-semibold mb-2">💡 Recomendações</h5>
+                            <ul class="text-green-100/80 text-sm space-y-1">
+                                <li>• <strong>Para começar:</strong> Use Ideogram (melhor qualidade)</li>
+                                <li>• <strong>Para economia:</strong> Use Flux Pro (rápido e barato)</li>
+                                <li>• <strong>Para premium:</strong> Use DALL-E 3 (OpenAI)</li>
+                                <li>• <strong>Todas funcionam:</strong> Escolha baseado no seu orçamento</li>
+                            </ul>
+                        </div>
+
                         <!-- Info de Segurança -->
-                        <div class="mt-6 p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                        <div class="mt-4 p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
                             <h5 class="text-blue-200 font-semibold mb-2">🔒 Segurança</h5>
                             <ul class="text-blue-100/80 text-sm space-y-1">
                                 <li>• Suas chaves ficam armazenadas apenas no seu navegador</li>
