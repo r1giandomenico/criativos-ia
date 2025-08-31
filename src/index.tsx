@@ -26,11 +26,11 @@ const STYLES = {
 }
 
 const SOCIAL_BENEFIT_THEMES = {
-  'education': 'education, learning, books, knowledge',
-  'health': 'healthcare, wellness, medical care',
-  'environment': 'nature, green environment, sustainability',
-  'community': 'community support, helping others, volunteering',
-  'technology': 'technology for good, digital inclusion'
+  'housing': 'social housing program, new houses, families with houses, affordable housing, government housing program, Brazilian families, dream house, home ownership',
+  'education': 'education, learning, schools, students, educational programs',
+  'health': 'healthcare, medical care, hospitals, health programs',
+  'family': 'happy Brazilian families, children, parents, family unity, social programs',
+  'community': 'community development, neighborhood, social inclusion, urban development'
 }
 
 app.get('/', (c) => {
@@ -109,11 +109,11 @@ app.get('/', (c) => {
                             <div>
                                 <label class="block text-white font-semibold mb-2">Tema Social:</label>
                                 <select id="social-theme" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                    <option value="housing">Habitação (Minha Casa Minha Vida)</option>
+                                    <option value="family">Família Beneficiária</option>
                                     <option value="education">Educação</option>
                                     <option value="health">Saúde</option>
-                                    <option value="environment">Meio Ambiente</option>
                                     <option value="community">Comunidade</option>
-                                    <option value="technology">Tecnologia</option>
                                 </select>
                             </div>
                         </div>
@@ -463,22 +463,66 @@ app.post('/api/generate', async (c) => {
       const styleDesc = STYLES[style] || STYLES.casual
       basePrompt = `${womanType}, ${styleDesc}, professional photography, high quality, detailed, beautiful lighting, 4k resolution`
     } else if (category === 'social') {
-      const theme = SOCIAL_BENEFIT_THEMES[socialTheme] || SOCIAL_BENEFIT_THEMES.education
-      basePrompt = `${theme}, inspiring, positive impact, professional photography, high quality, meaningful, uplifting, 4k resolution`
+      const theme = SOCIAL_BENEFIT_THEMES[socialTheme] || SOCIAL_BENEFIT_THEMES.housing
+      
+      if (socialTheme === 'housing') {
+        basePrompt = `Brazilian social housing program, new small houses in rows, happy Brazilian families in front of their new houses, children playing, adults smiling, government housing project, affordable housing complex, clean modern houses with red tile roofs, families holding keys, celebrating homeownership, bright sunny day, professional photography, high quality, realistic, documentary style, 4k resolution`
+      } else if (socialTheme === 'family') {
+        basePrompt = `Happy Brazilian family with children, parents and kids together, smiling and celebrating, in front of a new house, social program beneficiaries, diverse Brazilian family, joy and happiness, new home celebration, professional photography, high quality, realistic, warm lighting, 4k resolution`
+      } else {
+        basePrompt = `${theme}, Brazilian social programs, community development, inspiring, positive impact, professional photography, high quality, meaningful, uplifting, realistic, 4k resolution`
+      }
     }
 
     // Adicionar variações para múltiplas imagens
     const prompts = []
-    const variations = [
-      ', smiling naturally, bright eyes',
-      ', confident pose, professional lighting',
-      ', elegant composition, soft focus background', 
-      ', warm golden lighting, natural expression',
-      ', dynamic pose, vibrant colors',
-      ', candid moment, authentic smile',
-      ', artistic angle, dramatic lighting',
-      ', lifestyle photography, relaxed atmosphere'
-    ]
+    let variations = []
+    
+    if (category === 'social' && socialTheme === 'housing') {
+      variations = [
+        ', aerial view of housing complex with families outside',
+        ', close-up of Brazilian family holding house keys and smiling',
+        ', row of new houses with families in front celebrating',
+        ', children playing in front of new houses, parents watching',
+        ', couple with children standing proud in front of their new home',
+        ', wide shot of housing development with multiple families',
+        ', Brazilian family with "Minha Casa Minha Vida" signage visible',
+        ', families moving into new houses, boxes and celebration'
+      ]
+    } else if (category === 'social' && socialTheme === 'family') {
+      variations = [
+        ', Brazilian mother with children smiling in front of house',
+        ', father and mother with kids celebrating new home',
+        ', multi-generational Brazilian family, grandparents to children',
+        ', family portrait with house in background',
+        ', children playing while parents watch from new house',
+        ', family embracing in front of their new home',
+        ', parents lifting children in celebration of new house',
+        ', extended family gathering at new house celebration'
+      ]
+    } else if (category === 'women') {
+      variations = [
+        ', smiling naturally, bright eyes',
+        ', confident pose, professional lighting',
+        ', elegant composition, soft focus background', 
+        ', warm golden lighting, natural expression',
+        ', dynamic pose, vibrant colors',
+        ', candid moment, authentic smile',
+        ', artistic angle, dramatic lighting',
+        ', lifestyle photography, relaxed atmosphere'
+      ]
+    } else {
+      variations = [
+        ', inspiring community scene',
+        ', positive social impact moment',
+        ', people benefiting from social programs',
+        ', community development scene',
+        ', social inclusion and unity',
+        ', government program success story',
+        ', diverse Brazilian community',
+        ', uplifting social change moment'
+      ]
+    }
 
     for (let i = 0; i < quantity; i++) {
       const variation = variations[i % variations.length]
