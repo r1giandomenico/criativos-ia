@@ -170,6 +170,26 @@ app.get('/', (c) => {
                             >
                                 🗑️ Limpar Galeria
                             </button>
+                            
+                            <button 
+                                onclick="openConfigModal()"
+                                class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-all"
+                            >
+                                ⚙️ Configurar APIs
+                            </button>
+                        </div>
+                        
+                        <!-- Status da API -->
+                        <div id="api-status" class="mt-4 p-3 bg-white/10 rounded-lg text-sm">
+                            <div class="flex items-center justify-between">
+                                <span class="text-white/80">Status da API:</span>
+                                <span id="api-status-indicator" class="px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300">
+                                    🟡 Modo Demo
+                                </span>
+                            </div>
+                            <div id="api-provider-info" class="text-xs text-white/60 mt-1">
+                                Configure uma API para gerar imagens reais
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,6 +248,187 @@ app.get('/', (c) => {
             </div>
         </div>
 
+        <!-- Modal de Configurações de API -->
+        <div id="config-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                    <!-- Header -->
+                    <div class="flex justify-between items-center p-6 border-b border-white/20">
+                        <h3 class="text-white font-bold text-xl">🔑 Configurações de API</h3>
+                        <button 
+                            onclick="closeConfigModal()"
+                            class="text-white hover:text-red-400 text-2xl leading-none"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                        
+                        <!-- Seletor de API -->
+                        <div class="mb-6">
+                            <label class="block text-white font-semibold mb-3">Escolha sua API de IA:</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <button 
+                                    class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left"
+                                    data-provider="ideogram"
+                                    onclick="selectAPIProvider('ideogram')"
+                                >
+                                    <div class="font-bold text-white">🏆 Ideogram V3</div>
+                                    <div class="text-sm text-white/70">Melhor qualidade • ~$0.08/img</div>
+                                    <div class="text-xs text-white/60 mt-1">Ideal para mulheres realistas</div>
+                                </button>
+                                
+                                <button 
+                                    class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left"
+                                    data-provider="flux"
+                                    onclick="selectAPIProvider('flux')"
+                                >
+                                    <div class="font-bold text-white">⚡ Flux Pro</div>
+                                    <div class="text-sm text-white/70">Custo-benefício • ~$0.055/img</div>
+                                    <div class="text-xs text-white/60 mt-1">Rápido e eficiente</div>
+                                </button>
+                                
+                                <button 
+                                    class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left"
+                                    data-provider="openai"
+                                    onclick="selectAPIProvider('openai')"
+                                >
+                                    <div class="font-bold text-white">🤖 DALL-E 3</div>
+                                    <div class="text-sm text-white/70">Premium • ~$0.04-0.12/img</div>
+                                    <div class="text-xs text-white/60 mt-1">OpenAI - Qualidade premium</div>
+                                </button>
+                                
+                                <button 
+                                    class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left"
+                                    data-provider="stability"
+                                    onclick="selectAPIProvider('stability')"
+                                >
+                                    <div class="font-bold text-white">🎨 Stability AI</div>
+                                    <div class="text-sm text-white/70">Customizável • ~$0.04/img</div>
+                                    <div class="text-xs text-white/60 mt-1">Controle avançado</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Configuração da API Selecionada -->
+                        <div id="api-config-section" class="mb-6 hidden">
+                            <div class="bg-white/10 rounded-lg p-4 mb-4">
+                                <h4 id="selected-api-title" class="text-white font-semibold mb-2"></h4>
+                                <p id="selected-api-description" class="text-white/70 text-sm mb-4"></p>
+                                
+                                <!-- Link para obter API key -->
+                                <div class="mb-4">
+                                    <label class="block text-white/80 text-sm mb-2">Como obter a chave:</label>
+                                    <a id="api-signup-link" href="#" target="_blank" 
+                                       class="inline-flex items-center text-blue-300 hover:text-blue-200 text-sm">
+                                        🔗 <span id="signup-text">Clique aqui para se cadastrar</span> →
+                                    </a>
+                                </div>
+                                
+                                <!-- Input da API Key -->
+                                <div class="mb-4">
+                                    <label class="block text-white font-semibold mb-2">
+                                        Chave da API: <span id="api-key-format" class="text-white/60 text-xs"></span>
+                                    </label>
+                                    <input 
+                                        type="password" 
+                                        id="api-key-input"
+                                        placeholder="Cole sua chave de API aqui..."
+                                        class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                    />
+                                </div>
+                                
+                                <!-- Modelo (opcional) -->
+                                <div class="mb-4">
+                                    <label class="block text-white font-semibold mb-2">Modelo (opcional):</label>
+                                    <select id="api-model-select" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
+                                        <!-- Preenchido dinamicamente -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Teste da API -->
+                        <div id="api-test-section" class="mb-6 hidden">
+                            <button 
+                                onclick="testAPIConnection()"
+                                id="test-api-btn"
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+                            >
+                                🧪 Testar Conexão
+                            </button>
+                            
+                            <div id="test-result" class="mt-3 p-3 rounded-lg hidden">
+                                <!-- Resultado do teste aparecerá aqui -->
+                            </div>
+                        </div>
+
+                        <!-- Configurações Avançadas -->
+                        <div class="mb-6">
+                            <details class="bg-white/10 rounded-lg">
+                                <summary class="p-4 cursor-pointer text-white font-semibold">
+                                    ⚙️ Configurações Avançadas
+                                </summary>
+                                <div class="p-4 pt-0 space-y-4">
+                                    <div>
+                                        <label class="block text-white/80 text-sm mb-2">Máximo de imagens por requisição:</label>
+                                        <input 
+                                            type="number" 
+                                            id="max-images-input"
+                                            value="10"
+                                            min="1" max="20"
+                                            class="w-full p-2 rounded bg-white/20 text-white border border-white/30"
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-white/80 text-sm mb-2">Timeout (segundos):</label>
+                                        <input 
+                                            type="number" 
+                                            id="timeout-input"
+                                            value="60"
+                                            min="10" max="300"
+                                            class="w-full p-2 rounded bg-white/20 text-white border border-white/30"
+                                        />
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Botões de Ação -->
+                        <div class="flex gap-3">
+                            <button 
+                                onclick="saveAPIConfig()"
+                                class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition-all"
+                            >
+                                💾 Salvar Configuração
+                            </button>
+                            
+                            <button 
+                                onclick="clearAPIConfig()"
+                                class="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-4 rounded-lg transition-all"
+                            >
+                                🗑️ Limpar
+                            </button>
+                        </div>
+
+                        <!-- Info de Segurança -->
+                        <div class="mt-6 p-4 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                            <h5 class="text-blue-200 font-semibold mb-2">🔒 Segurança</h5>
+                            <ul class="text-blue-100/80 text-sm space-y-1">
+                                <li>• Suas chaves ficam armazenadas apenas no seu navegador</li>
+                                <li>• Não enviamos suas chaves para nossos servidores</li>
+                                <li>• As chaves são criptografadas no localStorage</li>
+                                <li>• Você pode apagar suas configurações a qualquer momento</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <script src="/static/app.js"></script>
     </body>
     </html>
@@ -238,7 +439,7 @@ app.get('/', (c) => {
 app.post('/api/generate', async (c) => {
   try {
     const { env } = c // Acessar variáveis de ambiente no Cloudflare
-    const { category, nationality, style, socialTheme, aspectRatio, quantity } = await c.req.json()
+    const { category, nationality, style, socialTheme, aspectRatio, quantity, userAPIConfig } = await c.req.json()
     
     // Validar limites
     if (quantity > 10) {
@@ -291,29 +492,41 @@ app.post('/api/generate', async (c) => {
       prompts.push(finalPrompt + technicalSpecs)
     }
 
-    // Verificar se as chaves de API estão configuradas
-    const useRealAPI = env?.AI_API_PROVIDER && (
+    // Verificar se há configuração do usuário OU variáveis de ambiente
+    const userHasAPI = userAPIConfig && userAPIConfig.provider && userAPIConfig.apiKey
+    const serverHasAPI = env?.AI_API_PROVIDER && (
       env.IDEOGRAM_API_KEY || 
       env.OPENAI_API_KEY || 
       env.FLUX_API_KEY || 
       env.STABILITY_API_KEY
     )
+    
+    const useRealAPI = userHasAPI || serverHasAPI
 
     const results = []
 
     if (useRealAPI) {
       // INTEGRAÇÃO COM API REAL
-      const { generateImageWithAI, validateAIConfig } = await import('./ai-integration')
-      const aiConfig = validateAIConfig(env)
+      const { generateImageWithAI, validateAIConfig, validateUserAPIConfig } = await import('./ai-integration')
       
-      if (!aiConfig) {
+      let aiConfig = null
+      
+      // Priorizar configuração do usuário
+      if (userHasAPI) {
+        aiConfig = validateUserAPIConfig(userAPIConfig)
+        console.log(`Using user-configured ${aiConfig?.provider} API for ${quantity} images`)
+      } else {
+        // Usar configuração do servidor
+        aiConfig = validateAIConfig(env)
+        console.log(`Using server-configured ${aiConfig?.provider} API for ${quantity} images`)
+      }
+      
+      if (!aiConfig || !aiConfig.apiKey) {
         return c.json({ 
           success: false, 
-          error: 'AI API not properly configured. Please check your environment variables.' 
+          error: 'AI API not properly configured. Please check your API settings.' 
         }, 500)
       }
-
-      console.log(`Using ${aiConfig.provider} API for ${quantity} images`)
 
       // Gerar imagens com API real
       for (let i = 0; i < prompts.length; i++) {
@@ -401,12 +614,71 @@ app.post('/api/generate', async (c) => {
       images: results, 
       totalGenerated: results.length,
       mode: useRealAPI ? 'ai' : 'demo',
-      provider: useRealAPI ? env.AI_API_PROVIDER : 'placeholder'
+      provider: useRealAPI ? (userHasAPI ? userAPIConfig.provider : env.AI_API_PROVIDER) : 'placeholder'
     })
 
   } catch (error) {
     console.error('Erro na geração:', error)
     return c.json({ success: false, error: error.message }, 500)
+  }
+})
+
+// API para testar conexão com a API de IA
+app.post('/api/test-connection', async (c) => {
+  try {
+    const { provider, apiKey, model } = await c.req.json()
+    
+    if (!provider || !apiKey) {
+      return c.json({ success: false, error: 'Provider and API key are required' }, 400)
+    }
+
+    const startTime = Date.now()
+    
+    // Validar configuração do usuário para teste
+    const { validateUserAPIConfig, generateImageWithAI } = await import('./ai-integration')
+    
+    const testConfig = validateUserAPIConfig({
+      provider,
+      apiKey,
+      model: model || 'default'
+    })
+
+    if (!testConfig) {
+      return c.json({
+        success: false,
+        error: `Invalid configuration for provider: ${provider}`
+      }, 400)
+    }
+    
+    const testResult = await generateImageWithAI(testConfig, {
+      prompt: 'A simple test image, minimal style, quick generation',
+      aspectRatio: '1:1',
+      model: model
+    })
+
+    const responseTime = Date.now() - startTime
+
+    if (testResult.success) {
+      return c.json({
+        success: true,
+        provider,
+        model,
+        responseTime,
+        message: 'API connection successful'
+      })
+    } else {
+      return c.json({
+        success: false,
+        error: testResult.error || 'Failed to generate test image'
+      }, 400)
+    }
+
+  } catch (error) {
+    console.error('Test connection error:', error)
+    return c.json({
+      success: false,
+      error: error.message || 'Connection test failed'
+    }, 500)
   }
 })
 

@@ -1,6 +1,91 @@
 // Estado da aplicação
 let currentCategory = 'women'
 let generatedImages = []
+let currentAPIConfig = null
+
+// Configurações das APIs
+const API_PROVIDERS = {
+  ideogram: {
+    name: '🏆 Ideogram V3',
+    description: 'Melhor qualidade para pessoas e criativos. Excelente para diferentes etnias e estilos realistas.',
+    signupUrl: 'https://ideogram.ai/',
+    signupText: 'Cadastre-se no Ideogram.ai',
+    keyFormat: 'Ex: ideogram_xxxxxxxx',
+    models: ['V_3', 'V_2', 'V_1'],
+    defaultModel: 'V_3',
+    cost: '~$0.08/imagem'
+  },
+  flux: {
+    name: '⚡ Flux Pro',
+    description: 'Melhor custo-benefício. Rápido e eficiente para geração em massa.',
+    signupUrl: 'https://replicate.com/account/api-tokens',
+    signupText: 'Obtenha token no Replicate',
+    keyFormat: 'Ex: r8_xxxxxxxx ou flux_xxxxxxxx',
+    models: ['flux-pro-1.1', 'flux-dev', 'flux-schnell'],
+    defaultModel: 'flux-pro-1.1',
+    cost: '~$0.055/imagem'
+  },
+  openai: {
+    name: '🤖 DALL-E 3 (OpenAI)',
+    description: 'Qualidade premium da OpenAI. Excelente seguimento de instruções complexas.',
+    signupUrl: 'https://platform.openai.com/api-keys',
+    signupText: 'Criar chave na OpenAI',
+    keyFormat: 'Ex: sk-xxxxxxxx',
+    models: ['dall-e-3', 'dall-e-2'],
+    defaultModel: 'dall-e-3',
+    cost: '~$0.04-0.12/imagem'
+  },
+  stability: {
+    name: '🎨 Stability AI',
+    description: 'Controle avançado e modelos customizáveis. Ideal para ajustes específicos.',
+    signupUrl: 'https://platform.stability.ai/account/keys',
+    signupText: 'Gerar chave na Stability AI',
+    keyFormat: 'Ex: sk-xxxxxxxx',
+    models: ['core', 'sd3-large', 'sd3-medium'],
+    defaultModel: 'core',
+    cost: '~$0.04/imagem'
+  }
+}
+
+// Função para criptografia simples (base64 + chave)
+function encryptData(data) {
+  return btoa(JSON.stringify(data))
+}
+
+function decryptData(encryptedData) {
+  try {
+    return JSON.parse(atob(encryptedData))
+  } catch {
+    return null
+  }
+}
+
+// Carregar configuração salva
+function loadAPIConfig() {
+  try {
+    const saved = localStorage.getItem('webapp_api_config')
+    if (saved) {
+      currentAPIConfig = decryptData(saved)
+      updateAPIStatus()
+      return currentAPIConfig
+    }
+  } catch (error) {
+    console.error('Erro ao carregar configuração:', error)
+  }
+  return null
+}
+
+// Salvar configuração
+function saveAPIConfigToStorage(config) {
+  try {
+    localStorage.setItem('webapp_api_config', encryptData(config))
+    currentAPIConfig = config
+    updateAPIStatus()
+  } catch (error) {
+    console.error('Erro ao salvar configuração:', error)
+    showNotification('❌ Erro ao salvar configuração', 'error')
+  }
+}
 
 // Seleção de categoria
 function selectCategory(category) {
@@ -34,8 +119,9 @@ async function generateImages() {
   const quantity = parseInt(document.getElementById('quantity').value)
   
   // Validações
-  if (quantity > 10) {
-    showNotification('⚠️ Máximo de 10 imagens por vez para performance', 'error')
+  const maxImages = currentAPIConfig?.maxImages || 10
+  if (quantity > maxImages) {
+    showNotification(`⚠️ Máximo de ${maxImages} imagens por vez`, 'error')
     return
   }
   
@@ -66,7 +152,17 @@ async function generateImages() {
       requestData.socialTheme = document.getElementById('social-theme').value
     }
     
-    console.log('Enviando requisição:', requestData)
+    // Incluir configurações da API do usuário se disponível
+    if (currentAPIConfig) {
+      requestData.userAPIConfig = {
+        provider: currentAPIConfig.provider,
+        apiKey: currentAPIConfig.apiKey,
+        model: currentAPIConfig.model,
+        timeout: currentAPIConfig.timeout
+      }
+    }
+    
+    console.log('Enviando requisição:', { ...requestData, userAPIConfig: requestData.userAPIConfig ? '[CONFIGURADO]' : '[DEMO]' })
     
     const startTime = Date.now()
     const response = await fetch('/api/generate', {
@@ -326,9 +422,187 @@ function showNotification(message, type = 'info') {
   }, 3000)
 }
 
+// Funções do Modal de Configuração
+function openConfigModal() {
+  document.getElementById('config-modal').classList.remove('hidden')
+  document.body.style.overflow = 'hidden'
+  
+  // Carregar configuração atual se existir
+  const config = loadAPIConfig()
+  if (config && config.provider) {
+    selectAPIProvider(config.provider)
+    document.getElementById('api-key-input').value = config.apiKey || ''
+    document.getElementById('api-model-select').value = config.model || ''
+    document.getElementById('max-images-input').value = config.maxImages || 10
+    document.getElementById('timeout-input').value = config.timeout || 60
+  }
+}
+
+function closeConfigModal() {
+  document.getElementById('config-modal').classList.add('hidden')
+  document.body.style.overflow = 'auto'
+}
+
+function selectAPIProvider(provider) {
+  // Remover seleção anterior
+  document.querySelectorAll('.api-provider-btn').forEach(btn => {
+    btn.classList.remove('border-purple-500', 'bg-purple-500/20')
+    btn.classList.add('border-white/20', 'bg-white/5')
+  })
+  
+  // Selecionar novo
+  const selectedBtn = document.querySelector(`[data-provider="${provider}"]`)
+  selectedBtn.classList.remove('border-white/20', 'bg-white/5')
+  selectedBtn.classList.add('border-purple-500', 'bg-purple-500/20')
+  
+  // Atualizar seção de configuração
+  const config = API_PROVIDERS[provider]
+  document.getElementById('selected-api-title').textContent = config.name
+  document.getElementById('selected-api-description').textContent = config.description
+  document.getElementById('api-signup-link').href = config.signupUrl
+  document.getElementById('signup-text').textContent = config.signupText
+  document.getElementById('api-key-format').textContent = config.keyFormat
+  
+  // Preencher modelos
+  const modelSelect = document.getElementById('api-model-select')
+  modelSelect.innerHTML = config.models.map(model => 
+    `<option value="${model}" ${model === config.defaultModel ? 'selected' : ''}>${model}</option>`
+  ).join('')
+  
+  // Mostrar seções
+  document.getElementById('api-config-section').classList.remove('hidden')
+  document.getElementById('api-test-section').classList.remove('hidden')
+  
+  // Salvar provider selecionado temporariamente
+  window.tempSelectedProvider = provider
+}
+
+async function testAPIConnection() {
+  const provider = window.tempSelectedProvider
+  const apiKey = document.getElementById('api-key-input').value.trim()
+  const model = document.getElementById('api-model-select').value
+  
+  if (!provider || !apiKey) {
+    showNotification('❌ Selecione uma API e insira a chave', 'error')
+    return
+  }
+  
+  const testBtn = document.getElementById('test-api-btn')
+  const testResult = document.getElementById('test-result')
+  
+  testBtn.disabled = true
+  testBtn.textContent = '🔄 Testando...'
+  testResult.classList.add('hidden')
+  
+  try {
+    // Fazer requisição de teste
+    const response = await fetch('/api/test-connection', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider,
+        apiKey,
+        model
+      })
+    })
+    
+    const result = await response.json()
+    
+    testResult.classList.remove('hidden')
+    
+    if (result.success) {
+      testResult.className = 'mt-3 p-3 rounded-lg bg-green-500/20 border border-green-500/30'
+      testResult.innerHTML = `
+        <div class="text-green-200 font-semibold">✅ Conexão bem-sucedida!</div>
+        <div class="text-green-100/80 text-sm mt-1">
+          API: ${result.provider} • Modelo: ${result.model} • Tempo: ${result.responseTime}ms
+        </div>
+      `
+      showNotification('✅ API configurada com sucesso!', 'success')
+    } else {
+      testResult.className = 'mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/30'
+      testResult.innerHTML = `
+        <div class="text-red-200 font-semibold">❌ Erro na conexão</div>
+        <div class="text-red-100/80 text-sm mt-1">${result.error}</div>
+      `
+      showNotification('❌ Erro na API: ' + result.error, 'error')
+    }
+    
+  } catch (error) {
+    testResult.classList.remove('hidden')
+    testResult.className = 'mt-3 p-3 rounded-lg bg-red-500/20 border border-red-500/30'
+    testResult.innerHTML = `
+      <div class="text-red-200 font-semibold">❌ Erro de conexão</div>
+      <div class="text-red-100/80 text-sm mt-1">${error.message}</div>
+    `
+    showNotification('❌ Erro de conexão', 'error')
+  } finally {
+    testBtn.disabled = false
+    testBtn.textContent = '🧪 Testar Conexão'
+  }
+}
+
+function saveAPIConfig() {
+  const provider = window.tempSelectedProvider
+  const apiKey = document.getElementById('api-key-input').value.trim()
+  const model = document.getElementById('api-model-select').value
+  const maxImages = parseInt(document.getElementById('max-images-input').value) || 10
+  const timeout = parseInt(document.getElementById('timeout-input').value) || 60
+  
+  if (!provider || !apiKey) {
+    showNotification('❌ Selecione uma API e insira a chave', 'error')
+    return
+  }
+  
+  const config = {
+    provider,
+    apiKey,
+    model,
+    maxImages,
+    timeout,
+    savedAt: new Date().toISOString()
+  }
+  
+  saveAPIConfigToStorage(config)
+  closeConfigModal()
+  showNotification('💾 Configuração salva com sucesso!', 'success')
+}
+
+function clearAPIConfig() {
+  if (confirm('Tem certeza que deseja limpar todas as configurações de API?')) {
+    localStorage.removeItem('webapp_api_config')
+    currentAPIConfig = null
+    updateAPIStatus()
+    closeConfigModal()
+    showNotification('🗑️ Configurações limpas', 'info')
+  }
+}
+
+function updateAPIStatus() {
+  const statusIndicator = document.getElementById('api-status-indicator')
+  const providerInfo = document.getElementById('api-provider-info')
+  
+  if (currentAPIConfig && currentAPIConfig.provider) {
+    const provider = API_PROVIDERS[currentAPIConfig.provider]
+    statusIndicator.className = 'px-2 py-1 rounded-full text-xs bg-green-500/20 text-green-300'
+    statusIndicator.textContent = '🟢 API Ativa'
+    providerInfo.textContent = `${provider.name} • Modelo: ${currentAPIConfig.model || provider.defaultModel}`
+  } else {
+    statusIndicator.className = 'px-2 py-1 rounded-full text-xs bg-yellow-500/20 text-yellow-300'
+    statusIndicator.textContent = '🟡 Modo Demo'
+    providerInfo.textContent = 'Configure uma API para gerar imagens reais'
+  }
+}
+
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
   selectCategory('women')
+  loadAPIConfig() // Carregar configuração salva
+  
+  // Estilizar botões da API inicialmente
+  document.querySelectorAll('.api-provider-btn').forEach(btn => {
+    btn.classList.add('border-white/20', 'bg-white/5', 'hover:border-white/40', 'hover:bg-white/10')
+  })
 })
 
 // Modal para visualização de imagem

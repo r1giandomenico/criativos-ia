@@ -212,3 +212,25 @@ export function validateAIConfig(env: any): AIConfig | null {
     model: env.AI_MODEL_DEFAULT || providerConfig.defaultModel
   }
 }
+
+// Função para validar configuração do usuário
+export function validateUserAPIConfig(userConfig: any): AIConfig | null {
+  if (!userConfig || !userConfig.provider || !userConfig.apiKey) {
+    return null
+  }
+
+  const provider = userConfig.provider
+  const providerConfig = AI_PROVIDERS[provider as keyof typeof AI_PROVIDERS]
+  
+  if (!providerConfig) {
+    console.error(`Unsupported provider: ${provider}`)
+    return null
+  }
+
+  return {
+    provider,
+    apiKey: userConfig.apiKey,
+    endpoint: providerConfig.endpoint,
+    model: userConfig.model || providerConfig.defaultModel
+  }
+}
