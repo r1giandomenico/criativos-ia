@@ -21,6 +21,37 @@ interface GenerateImageResponse {
 
 // Configurações das APIs suportadas
 const AI_PROVIDERS = {
+  pollinations: {
+    endpoint: 'https://pollinations.ai/p',
+    defaultModel: 'flux',
+    headers: (apiKey: string) => ({}), // Pollinations é gratuito, sem headers
+    formatRequest: (prompt: string, aspectRatio: string, model: string) => {
+      // Mapear aspect ratio para dimensões
+      const sizeMap: Record<string, { width: number, height: number }> = {
+        '1:1': { width: 1024, height: 1024 },
+        '16:9': { width: 1365, height: 768 },
+        '9:16': { width: 768, height: 1365 },
+        '4:5': { width: 820, height: 1024 },
+        '3:2': { width: 1365, height: 910 }
+      }
+      
+      const size = sizeMap[aspectRatio] || sizeMap['1:1']
+      const seed = Math.floor(Math.random() * 1000000)
+      
+      return {
+        prompt,
+        width: size.width,
+        height: size.height,
+        seed,
+        model: model || 'flux'
+      }
+    },
+    parseResponse: (data: any, imageUrl: string) => ({
+      success: true,
+      imageUrl: imageUrl
+    })
+  },
+
   ideogram: {
     endpoint: 'https://api.ideogram.ai/generate',
     defaultModel: 'V_3',
@@ -169,17 +200,40 @@ export async function generateImageWithAI(
       return { success: false, error: `Provider ${config.provider} not supported` }
     }
 
+    console.log(`Generating image with ${config.provider}:`, {
+      prompt: request.prompt.substring(0, 100) + '...',
+      aspectRatio: request.aspectRatio
+    })
+
+    // Pollinations tem implementação especial (GET request via URL)
+    if (config.provider === 'pollinations') {
+      const params = provider.formatRequest(
+        request.prompt,
+        request.aspectRatio,
+        request.model || provider.defaultModel
+      )
+      
+      // Construir URL com parâmetros
+      const url = new URL(config.endpoint + '/' + encodeURIComponent(params.prompt))
+      url.searchParams.set('width', params.width.toString())
+      url.searchParams.set('height', params.height.toString())
+      url.searchParams.set('seed', params.seed.toString())
+      url.searchParams.set('model', params.model)
+      url.searchParams.set('nologo', 'true') // Remove watermark
+      
+      const finalUrl = url.toString()
+      console.log('Pollinations URL:', finalUrl)
+      
+      // Para Pollinations, a URL já é a imagem final
+      return provider.parseResponse(null, finalUrl)
+    }
+
     const headers = provider.headers(config.apiKey)
     const requestBody = provider.formatRequest(
       request.prompt, 
       request.aspectRatio, 
       request.model || provider.defaultModel
     )
-
-    console.log(`Generating image with ${config.provider}:`, {
-      prompt: request.prompt.substring(0, 100) + '...',
-      aspectRatio: request.aspectRatio
-    })
 
     const response = await fetch(config.endpoint, {
       method: 'POST',
@@ -217,9 +271,10 @@ export async function generateImageWithAI(
 
 // Função auxiliar para validar configuração
 export function validateAIConfig(env: any): AIConfig | null {
-  const provider = env.AI_API_PROVIDER || 'ideogram'
+  const provider = env.AI_API_PROVIDER || 'pollinations' // Pollinations como padrão (gratuito)
   
   const apiKeyMap = {
+    pollinations: 'free', // Pollinations não precisa de API key
     ideogram: env.IDEOGRAM_API_KEY,
     openai: env.OPENAI_API_KEY, 
     flux: env.FLUX_API_KEY,
@@ -245,15 +300,30 @@ export function validateAIConfig(env: any): AIConfig | null {
 
 // Função para validar configuração do usuário
 export function validateUserAPIConfig(userConfig: any): AIConfig | null {
-  if (!userConfig || !userConfig.provider || !userConfig.apiKey) {
+  if (!userConfig || !userConfig.provider) {
     return null
   }
-
+  
   const provider = userConfig.provider
   const providerConfig = AI_PROVIDERS[provider as keyof typeof AI_PROVIDERS]
   
   if (!providerConfig) {
     console.error(`Unsupported provider: ${provider}`)
+    return null
+  }
+  
+  // Pollinations não precisa de API key
+  if (provider === 'pollinations') {
+    return {
+      provider,
+      apiKey: 'free',
+      endpoint: providerConfig.endpoint,
+      model: userConfig.model || providerConfig.defaultModel
+    }
+  }
+  
+  // Outros providers precisam de API key
+  if (!userConfig.apiKey) {
     return null
   }
 

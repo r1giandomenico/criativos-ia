@@ -1,163 +1,187 @@
 # 🎨 Gerador de Criativos para Meta Ads
 
-## Visão Geral
-Sistema avançado de geração de imagens com IA especializado em criar criativos para Meta Ads (Facebook/Instagram). Focado no nicho de relacionamento com múltiplas opções de personalização.
+## Project Overview
+- **Name**: Gerador de Criativos para Meta Ads
+- **Goal**: Sistema completo de geração de imagens com IA para campanhas no Facebook e Instagram
+- **Features**: Geração de mulheres de diferentes nacionalidades, imagens para benefícios sociais (Minha Casa Minha Vida), configuração de APIs e download em lote
 
-### URLs
-- **Desenvolvimento**: https://3000-ix26c1zvlwzzljkxj8h4x-6532622b.e2b.dev
-- **API Base**: `/api/generate`
+## URLs
+- **Production**: https://3000-ix26c1zvlwzzljkxj8h4x-6532622b.e2b.dev
+- **API Base**: https://3000-ix26c1zvlwzzljkxj8h4x-6532622b.e2b.dev/api
+- **GitHub**: Em desenvolvimento
 
-## ✨ Funcionalidades Implementadas
+## ✅ Recursos Implementados
 
-### 🎯 Categorias de Criativos
-1. **👩 Mulheres para Relacionamento**
-   - Nacionalidades: Brasileira, Árabe, Mexicana, Americana, Europeia, Asiática
-   - Estilos: Sexy, Bikini, Casual, Formal, Fitness
-   - Prompts otimizados para conversão
+### 🎯 Funcionalidades Principais
+- **Geração de Mulheres**: 6 nacionalidades (Brasileira, Árabe, Mexicana, Americana, Europeia, Asiática) em 8 estilos (Sexy, Sedutora, Glamour, Bikini, Moderna, Casual, Formal, Fitness)
+- **Benefícios Sociais**: Imagens específicas para "Minha Casa Minha Vida" (Brasil) e "Bienestar México" (Mujeres con Bienestar)
+- **Múltiplos Formatos**: Quadrado (1:1), Vertical (9:16), Horizontal (16:9), Retrato (4:5), Paisagem (3:2)
+- **Geração em Lote**: De 1 a 10 imagens por vez para testes A/B
+- **Preview de Prompt**: Visualização e edição do prompt antes de gerar
+- **Download ZIP**: Baixar todas as imagens geradas em um arquivo compactado com informações detalhadas
 
-2. **🤝 Benefício Social**
-   - Educação, Saúde, Meio Ambiente, Comunidade, Tecnologia
-   - Imagens inspiradoras e positivas
+### ⚙️ Configuração de APIs
+- **🆓 Pollinations AI**: 100% GRATUITO - Sem limites, usando Flux e Stable Diffusion
+- **Ideogram V3**: Melhor qualidade (~$0.08/img)
+- **Flux Pro**: Custo-benefício (~$0.055/img) 
+- **DALL-E 3**: Premium OpenAI (~$0.04-0.12/img)
+- **Stability AI**: Controle avançado (~$0.04/img)
+- **Modo Demo**: Imagens placeholder para teste sem API
 
-### 🔧 Recursos Técnicos
-- **Formatos**: Quadrado (1:1), Vertical (9:16), Horizontal (16:9), Retrato (4:3)
-- **Geração em Massa**: 1, 3, 5 ou 10 imagens simultâneas
-- **Galeria Interativa**: Visualização, download, cópia de prompts
-- **Modal de Detalhes**: Visualização completa das imagens
-- **Exportação**: Download em lote e exportação de prompts
-- **Responsivo**: Interface otimizada para desktop e mobile
+### 🔧 Funcionalidades Técnicas
+- **Armazenamento Seguro**: APIs armazenadas criptografadas no localStorage
+- **Teste de Conexão**: Validação automática das APIs configuradas
+- **Galeria Interativa**: Visualização, download individual, cópia de prompts
+- **Estatísticas**: Contador de imagens geradas por categoria
+- **Interface Responsiva**: TailwindCSS com design moderno
 
-### ⚡ Funcionalidades Avançadas
-- **Prompts Inteligentes**: Geração automática com variações
-- **Estatísticas**: Contadores por categoria e tempo
-- **Atalhos de Teclado**: Ctrl+Enter (gerar), Ctrl+Del (limpar), Esc (fechar modal)
-- **Notificações**: Sistema de feedback em tempo real
-- **Cache de Sessão**: Manutenção das imagens durante a navegação
+## 📊 Endpoints da API
 
-## 🛠️ Arquitetura Técnica
-
-### Stack
-- **Backend**: Hono Framework + TypeScript
-- **Frontend**: JavaScript Vanilla + TailwindCSS
-- **Deploy**: Cloudflare Pages/Workers
-- **Gerenciamento**: PM2 (desenvolvimento)
-
-### Estrutura de Dados
+### POST /api/generate
+Gerar imagens com IA ou placeholders
 ```json
 {
-  "id": "img_timestamp_index",
-  "prompt": "Beautiful Brazilian woman, sexy style...",
-  "url": "https://image-url.com/image.jpg",
-  "aspectRatio": "9:16",
-  "category": "women",
-  "nationality": "brazilian",
-  "style": "sexy",
-  "timestamp": "2025-08-30T23:15:30.783Z"
+  "category": "women|social",
+  "nationality": "brazilian|arabic|mexican|american|european|asian",
+  "style": "sexy|bikini|casual|formal|fitness",
+  "socialTheme": "housing|family|education|health|community", 
+  "aspectRatio": "1:1|9:16|16:9|4:5|3:2",
+  "quantity": 1-10,
+  "customPrompt": "prompt personalizado (opcional)",
+  "userAPIConfig": { "provider": "ideogram", "apiKey": "xxx", "model": "V_3" }
 }
 ```
 
-### Endpoints da API
-- `GET /` - Interface principal
-- `POST /api/generate` - Geração de imagens
-- `POST /api/generate-with-ai` - Template para integração com API real
-- `GET /api/stats` - Estatísticas do sistema
-
-## 🎨 Tipos de Prompts Gerados
-
-### Mulheres
-```
-Beautiful [Nationality] woman, [style], professional photography, 
-high quality, detailed, beautiful lighting, 4k resolution, 
-[variation], [technical_specs]
+### POST /api/test-connection
+Testar configuração de API
+```json
+{
+  "provider": "ideogram|flux|openai|stability",
+  "apiKey": "sua_chave_api",
+  "model": "modelo_específico"
+}
 ```
 
-### Benefício Social
-```
-[theme], inspiring, positive impact, professional photography, 
-high quality, meaningful, uplifting, 4k resolution, 
-[variation], [technical_specs]
-```
+### GET /api/stats
+Obter estatísticas de uso
 
-## 🚀 Como Usar
+## 🏗️ Arquitetura de Dados
 
-### Interface Web
-1. **Selecione a Categoria**: Mulheres ou Benefício Social
-2. **Configure os Parâmetros**: 
-   - Nacionalidade/Tema
-   - Estilo
-   - Formato da imagem
-   - Quantidade (1-10)
-3. **Clique em "Gerar Imagens"**
-4. **Gerencie na Galeria**: 
-   - Visualizar detalhes
-   - Download individual
-   - Copiar prompts
-   - Remover imagens
+### Modelos de Dados
+```typescript
+interface GeneratedImage {
+  id: string
+  prompt: string
+  url: string
+  aspectRatio: string
+  category: 'women' | 'social'
+  nationality?: string
+  style?: string
+  socialTheme?: string
+  timestamp: string
+  downloadUrl: string
+  provider: string
+  model: string
+}
 
-### Ações em Massa
-- **📦 Download Todas**: Baixa todas as imagens geradas
-- **📄 Exportar Prompts**: Salva todos os prompts em arquivo .txt
-- **🗑️ Limpar Galeria**: Remove todas as imagens
-
-### API Direct
-```bash
-curl -X POST http://localhost:3000/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{
-    "category": "women",
-    "nationality": "brazilian", 
-    "style": "sexy",
-    "aspectRatio": "9:16",
-    "quantity": 3
-  }'
+interface APIConfig {
+  provider: 'ideogram' | 'flux' | 'openai' | 'stability'
+  apiKey: string
+  model: string
+  maxImages: number
+  timeout: number
+  savedAt: string
+}
 ```
 
-## 📊 Estratégias para Meta Ads
+### Armazenamento
+- **Frontend**: localStorage (criptografado) para configurações de API
+- **Modo Demo**: Placeholder images via Picsum Photos
+- **APIs Externas**: Integração com múltiplos provedores de IA
 
-### Melhores Práticas Implementadas
-- **Diversidade de Nacionalidades**: Teste diferentes públicos
-- **Variação de Estilos**: Do casual ao sexy para diferentes audiências
-- **Formatos Otimizados**: Stories (9:16), Feed (1:1), Display (16:9)
-- **Prompts Únicos**: Cada imagem tem variações para evitar repetição
+### Fluxo de Dados
+1. **Configuração**: Usuário configura API → Validação → Armazenamento seguro
+2. **Geração**: Seleções → Prompt automático → Edição opcional → Chamada API → Galeria
+3. **Download**: Individual ou ZIP com metadados completos
 
-### Recomendações de Teste A/B
-1. **Por Nacionalidade**: Brasil vs EUA vs Árabe
-2. **Por Estilo**: Casual vs Sexy vs Bikini  
-3. **Por Formato**: Stories vs Feed vs Display
-4. **Por Variação**: Diferentes lighting e poses
+## 🚀 Guia do Usuário
 
-## 🔮 Próximos Passos Recomendados
+### 1. Configuração Inicial
+1. Clique em "⚙️ Configurar APIs"
+2. Escolha seu provedor (recomendado: Ideogram para qualidade)
+3. Insira sua chave de API
+4. Teste a conexão
+5. Salve as configurações
 
-### Integração com API Real
-1. **Configurar API de IA**: Substituir placeholders por API real
-2. **Adicionar Modelos**: ideogram/V_3, DALL-E, Midjourney
-3. **Cache Inteligente**: Sistema de cache para imagens geradas
-4. **Banco de Dados**: Persistência das imagens e metadados
+### 2. Geração de Imagens
+1. Escolha a categoria (👩 Mulheres ou 🤝 Benefício Social)
+2. Configure nacionalidade/estilo ou tema social
+3. Selecione formato e quantidade
+4. Revise/edite o prompt no preview
+5. Clique em "🎨 Gerar Imagens"
 
-### Melhorias de UX
-1. **Preview em Tempo Real**: Pré-visualização antes da geração
-2. **Templates**: Prompts salvos e reutilizáveis  
-3. **Histórico**: Sistema de favoritos e histórico
-4. **Campanhas**: Agrupamento por campanha/projeto
+### 3. Gerenciamento
+- **Visualizar**: Clique na imagem para ver detalhes
+- **Download**: Botão individual ou "📦 Download ZIP" para todas
+- **Copiar Prompt**: Para reutilizar em outras ferramentas
+- **Limpar**: Remover imagens da galeria
 
-### Analytics e Otimização
-1. **Métricas**: CTR, conversão por tipo de imagem
-2. **A/B Testing**: Framework integrado de testes
-3. **Feedback Loop**: Aprendizado baseado em performance
-4. **Relatórios**: Dashboard de performance das imagens
+## 🔄 Atualizações Recentes (31/08/2025)
 
-### Compliance e Segurança
-1. **Moderação**: Sistema de aprovação de conteúdo
-2. **LGPD/GDPR**: Conformidade com regulamentações
-3. **Rate Limiting**: Controle de uso da API
-4. **Watermark**: Marca d'água opcional
+### ✅ Atualizações Recentes - Prompts Melhorados e Correções
+1. **✅ Novos Estilos Femininos**: Adicionados estilos "Sedutora", "Glamour" e "Moderna"
+2. **✅ Prompts Mais Atraentes**: Descrições otimizadas para fotos sensuais (respeitando políticas)
+3. **✅ Variações Específicas**: Cada estilo tem 8 variações únicas e personalizadas
+4. **✅ Botão APIs Corrigido**: Modal de configuração funcionando com debug melhorado
+5. **✅ Download ZIP Simplificado**: Nova implementação mais estável e compatível
 
-## 🛡️ Status do Deploy
-- **Status**: ✅ Ativo (Desenvolvimento)
-- **Plataforma**: Cloudflare Pages
-- **Última Atualização**: 30/08/2025
-- **Performance**: ~2s por imagem, suporte a batch de 10
+### ✅ Nova Funcionalidade - Pollinations AI (GRATUITO)
+1. **✅ API 100% Gratuita**: Integração com Pollinations AI - sem custo, sem limites
+2. **✅ Modelos Avançados**: Flux, Stable Diffusion e Turbo disponíveis
+3. **✅ Fácil Configuração**: Não precisa de API key, funciona imediatamente
+4. **✅ Qualidade Excelente**: Resultados profissionais para Meta Ads
 
----
+### ✅ Nova Funcionalidade - Bienestar México
+1. **✅ Programa Social Mexicano**: Adicionada opção "Bienestar México (Mujeres con Bienestar)"
+2. **✅ Prompts Específicos**: Geração focada em mulheres mexicanas beneficiárias (1 pessoa por imagem)
+3. **✅ Contextualização Cultural**: Roupas tradicionais, cerimônias oficiais, cartões de benefício
+4. **✅ Variações Temáticas**: 8 variações específicas do programa social mexicano
 
-**Desenvolvido com foco em conversão para Meta Ads no nicho de relacionamento** 💖
+## 🔄 Correções Anteriores (31/08/2025)
+
+### ✅ Correções Implementadas
+1. **✅ Botão "Configurar APIs"**: Corrigido problema de modal não abrir
+2. **✅ Preview de Prompt**: Implementada visualização e edição inline (removido botão export desnecessário)
+3. **✅ Download ZIP**: Funcionalidade completamente reformulada com JSZip e tratamento de erros
+4. **✅ Prompts de Família**: Corrigidos para gerar máximo 1 casal + 2 filhos (total 4 pessoas)
+5. **✅ Aspectos Suportados**: Removido 4:3, adicionado 4:5 e 3:2 compatíveis com APIs
+
+### 🔧 Melhorias Técnicas
+- Validação aprimorada de elementos DOM
+- Tratamento robusto de erros no download ZIP
+- Carregamento dinâmico da biblioteca JSZip
+- Prompts mais específicos para famílias brasileiras
+- Compatibilidade com formatos aceitos pelas APIs de IA
+
+## 🛠️ Deployment
+- **Platform**: Cloudflare Pages
+- **Status**: ✅ Ativo e Funcionando
+- **Tech Stack**: Hono + TypeScript + TailwindCSS + Vite
+- **Build**: Automático via Wrangler
+- **Last Updated**: 31 de agosto de 2025
+
+## 📈 Próximos Passos
+1. **Integração GitHub**: Configurar repositório e versionamento
+2. **Deploy Production**: Migrar para Cloudflare Pages em produção
+3. **Analytics**: Implementar métricas de uso
+4. **Cache**: Sistema de cache para imagens geradas
+5. **Templates**: Prompts salvos e reutilizáveis
+6. **Batch Processing**: Melhorar performance para grandes volumes
+
+## 🏆 Destaques do Sistema
+- **Interface Intuitiva**: Design moderno e responsivo
+- **Flexibilidade**: Suporte a 4 APIs diferentes
+- **Segurança**: Chaves criptografadas no navegador
+- **Eficiência**: Geração em lote e download organizado
+- **Qualidade**: Prompts otimizados para Meta Ads
+- **Escalabilidade**: Arquitetura preparada para crescimento

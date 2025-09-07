@@ -18,20 +18,209 @@ const WOMAN_TYPES = {
 }
 
 const STYLES = {
-  'sexy': 'attractive, sensual, fashionable',
-  'bikini': 'wearing bikini, beach setting, summer vibes',
-  'casual': 'casual elegant outfit, natural beauty',
-  'formal': 'elegant formal dress, sophisticated',
-  'fitness': 'athletic wear, fit and healthy'
+  'sexy': 'attractive sensual style, fashionable outfit, confident pose, alluring look, stylish appearance',
+  'bikini': 'wearing bikini, beach setting, summer vibes, swimwear fashion',
+  'casual': 'casual elegant outfit, natural beauty, comfortable style',
+  'formal': 'elegant formal dress, sophisticated, classy outfit',
+  'fitness': 'athletic wear, fit and healthy, sporty style',
+  'seductive': 'seductive pose, attractive clothing, charming smile, confident attitude',
+  'glamour': 'glamorous outfit, stunning appearance, elegant pose, fashion model style',
+  'trendy': 'trendy modern outfit, stylish look, contemporary fashion, chic appearance'
 }
 
 const SOCIAL_BENEFIT_THEMES = {
   'housing': 'social housing program, new houses, families with houses, affordable housing, government housing program, Brazilian families, dream house, home ownership',
+  'bienestar': 'Mexican social program Bienestar México, Mujeres con Bienestar, Mexican women beneficiaries, social welfare cards, government support program, Mexican families receiving benefits',
   'education': 'education, learning, schools, students, educational programs',
   'health': 'healthcare, medical care, hospitals, health programs',
   'family': 'happy Brazilian families, children, parents, family unity, social programs',
   'community': 'community development, neighborhood, social inclusion, urban development'
 }
+
+// Rota do Editor de Imagens separado
+app.get('/editor', (c) => {
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🖼️ Editor de Imagens Facebook Ads</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+        <style>
+            .drag-area {
+                transition: all 0.3s ease;
+            }
+            .drag-area.drag-over {
+                border-color: #4299e1;
+                background-color: rgba(66, 153, 225, 0.1);
+            }
+            .preview-canvas {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+            }
+        </style>
+    </head>
+    <body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <!-- Header -->
+        <nav class="bg-white/10 backdrop-blur-md border-b border-white/20">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="text-2xl">🖼️</div>
+                        <h1 class="text-xl font-bold text-white">Editor de Imagens Facebook Ads</h1>
+                    </div>
+                    <a href="/" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar ao Gerador
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mx-auto px-4 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- Menu Lateral Esquerdo -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Origem das Imagens -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 class="text-lg font-semibold mb-3 text-white">
+                            <i class="fas fa-folder mr-2"></i>Carregar Imagens
+                        </h3>
+                        
+                        <div id="dropArea" class="drag-area p-8 text-center rounded border-2 border-dashed border-white/30 bg-white/5 cursor-pointer hover:bg-white/10 transition-all">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-white/40 mb-2"></i>
+                            <p class="text-white/70 mb-2">Arraste imagens aqui</p>
+                            <p class="text-white/50 text-sm">ou clique para selecionar</p>
+                            <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                        </div>
+                        
+                        <button id="uploadBtn" class="w-full mt-3 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-all">
+                            <i class="fas fa-upload mr-2"></i>Selecionar Arquivos
+                        </button>
+                    </div>
+
+                    <!-- Formato de Saída -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 class="text-lg font-semibold mb-3 text-white">
+                            <i class="fas fa-expand-arrows-alt mr-2"></i>Formato de Saída
+                        </h3>
+                        <select id="outputSize" class="w-full p-3 border border-white/30 bg-white/20 text-white rounded">
+                            <option value="1080x1080">1080×1080 (Facebook padrão)</option>
+                            <option value="1200x1200">1200×1200 (Facebook HD)</option>
+                            <option value="1080x1920">1080×1920 (Story)</option>
+                            <option value="1080x1350">1080×1350 (Instagram Post)</option>
+                            <option value="1200x628">1200×628 (Facebook Cover)</option>
+                        </select>
+                    </div>
+
+                    <!-- Ajuste de Imagem -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 class="text-lg font-semibold mb-3 text-white">
+                            <i class="fas fa-crop-alt mr-2"></i>Ajuste de Imagem
+                        </h3>
+                        <select id="fitMode" class="w-full p-3 border border-white/30 bg-white/20 text-white rounded mb-3">
+                            <option value="cover">Cover (preencher)</option>
+                            <option value="contain">Contain (caber)</option>
+                            <option value="fill">Fill (esticar)</option>
+                            <option value="crop">Crop (cortar)</option>
+                        </select>
+                    </div>
+
+                    <!-- Botão Play -->
+                    <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 class="text-lg font-semibold mb-3 text-white">
+                            <i class="fas fa-play mr-2"></i>Botão Play
+                        </h3>
+                        
+                        <div class="mb-3">
+                            <label class="flex items-center text-white">
+                                <input type="checkbox" id="enablePlay" class="mr-2">
+                                <span>Ativar Botão Play</span>
+                            </label>
+                        </div>
+
+                        <div id="playControls" class="space-y-3 hidden">
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-white/80">Estilo:</label>
+                                <select id="playStyle" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded">
+                                    <option value="youtube">YouTube Clássico</option>
+                                    <option value="circle">Círculo Moderno</option>
+                                    <option value="square">Quadrado Minimalista</option>
+                                    <option value="gradient">Gradiente</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-white/80">Tamanho:</label>
+                                <input type="range" id="playSize" min="30" max="120" value="60" class="w-full">
+                                <span id="playSizeValue" class="text-sm text-white/60">Tamanho: 60px</span>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium mb-1 text-white/80">Opacidade:</label>
+                                <input type="range" id="playOpacity" min="30" max="100" value="90" class="w-full">
+                                <span id="playOpacityValue" class="text-sm text-white/60">Opacidade: 90%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas Central -->
+                <div class="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                    <h3 class="text-lg font-semibold mb-4 text-white">
+                        <i class="fas fa-image mr-2"></i>Preview e Edição
+                    </h3>
+                    
+                    <div class="bg-black/20 rounded-lg p-4 min-h-96 flex items-center justify-center relative">
+                        <canvas id="canvas" class="max-w-full max-h-96 border border-white/20 rounded hidden"></canvas>
+                        <div id="canvasPlaceholder" class="text-center text-white/50">
+                            <i class="fas fa-image text-6xl mb-4"></i>
+                            <p>Selecione uma imagem para começar</p>
+                        </div>
+                    </div>
+                    
+                    <div id="canvasControls" class="mt-4 flex gap-2 justify-center">
+                        <button onclick="testeEditor()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-test mr-2"></i>Teste
+                        </button>
+                        <button id="applyBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-check mr-2"></i>Aplicar
+                        </button>
+                        <button id="resetBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-undo mr-2"></i>Resetar
+                        </button>
+                        <button id="downloadBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                            <i class="fas fa-download mr-2"></i>Download
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Imagens -->
+                <div class="lg:col-span-1 bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                    <h3 class="text-lg font-semibold mb-4 text-white">
+                        <i class="fas fa-th mr-2"></i>Imagens Carregadas
+                    </h3>
+                    <div id="imagesList" class="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
+                        <div class="text-center text-white/50 py-8">
+                            <i class="fas fa-images text-4xl mb-2"></i>
+                            <p>Nenhuma imagem carregada</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div id="notifications" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+        <script src="/static/editor.js"></script>
+    </body>
+    </html>
+  `)
+})
 
 app.get('/', (c) => {
   return c.html(`
@@ -44,12 +233,115 @@ app.get('/', (c) => {
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
         <link href="/static/style.css" rel="stylesheet">
+        <style>
+            .drag-area {
+                transition: all 0.3s ease;
+            }
+            .drag-area.drag-over {
+                border-color: #4299e1;
+                background-color: rgba(66, 153, 225, 0.1);
+            }
+            .preview-canvas {
+                max-width: 100%;
+                height: auto;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+            }
+            .image-thumbnail {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                border: 2px solid transparent;
+                cursor: pointer;
+                transition: border-color 0.2s;
+                border-radius: 8px;
+            }
+            .image-thumbnail.selected {
+                border-color: #4299e1;
+            }
+            .play-button-preview {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+            }
+            .nav-btn.active {
+                background: rgba(255, 255, 255, 0.2) !important;
+                border-color: rgba(255, 255, 255, 0.4) !important;
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            }
+            .tool-panel {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            .tool-panel.hidden {
+                display: none;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        </style>
     </head>
     <body class="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+        <!-- Menu Superior -->
+        <nav class="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
+            <div class="container mx-auto px-4">
+                <div class="flex items-center justify-between py-4">
+                    <!-- Logo/Brand -->
+                    <div class="flex items-center space-x-3">
+                        <div class="text-2xl">🎨</div>
+                        <h1 class="text-xl font-bold text-white">Meta Ads Studio</h1>
+                    </div>
+                    
+                    <!-- Link direto para editor -->
+                    <div class="flex items-center space-x-3">
+                        <a 
+                            href="/editor" 
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-all font-medium"
+                        >
+                            🖼️ Abrir Editor de Imagens
+                        </a>
+                    </div>
+                    
+                    <!-- Menu Navigation -->
+                    <div class="flex space-x-1">
+                        <button 
+                            onclick="switchTool('generator')" 
+                            id="nav-generator"
+                            class="nav-btn px-4 py-2 rounded-lg text-white font-medium transition-all bg-white/20 border border-white/30"
+                        >
+                            <i class="fas fa-magic mr-2"></i>Gerador de Criativos
+                        </button>
+                        <a 
+                            href="/editor"
+                            class="nav-btn px-4 py-2 rounded-lg text-white font-medium transition-all bg-blue-600 hover:bg-blue-700 border border-blue-500 inline-block"
+                        >
+                            <i class="fas fa-edit mr-2"></i>Editor de Imagens
+                        </a>
+                    </div>
+                    
+                    <!-- Transfer Button -->
+                    <button 
+                        onclick="transferImages()" 
+                        id="transfer-btn"
+                        class="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-all transform hover:scale-105 hidden"
+                    >
+                        <i class="fas fa-arrow-right mr-2"></i>Enviar para Editor
+                    </button>
+                </div>
+            </div>
+        </nav>
+
         <div class="container mx-auto px-4 py-8">
-            <h1 class="text-4xl font-bold text-white text-center mb-8">
-                🎨 Gerador de Criativos para Meta Ads
-            </h1>
+            <!-- Tool Container -->
+            <div id="tool-container">
+                <!-- Generator Tool -->
+                <div id="generator-tool" class="tool-panel">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-white mb-2">🎨 Gerador de Criativos</h2>
+                        <p class="text-white/80">Gere imagens com IA para suas campanhas no Meta Ads</p>
+                    </div>
             
             <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Painel de Controle -->
@@ -96,7 +388,10 @@ app.get('/', (c) => {
                                 <label class="block text-white font-semibold mb-2">Estilo:</label>
                                 <select id="style" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
                                     <option value="sexy">Sexy</option>
+                                    <option value="seductive">Sedutora</option>
+                                    <option value="glamour">Glamour</option>
                                     <option value="bikini">Bikini</option>
+                                    <option value="trendy">Moderna</option>
                                     <option value="casual">Casual</option>
                                     <option value="formal">Formal</option>
                                     <option value="fitness">Fitness</option>
@@ -110,6 +405,7 @@ app.get('/', (c) => {
                                 <label class="block text-white font-semibold mb-2">Tema Social:</label>
                                 <select id="social-theme" class="w-full p-3 rounded-lg bg-white/20 text-white border border-white/30">
                                     <option value="housing">Habitação (Minha Casa Minha Vida)</option>
+                                    <option value="bienestar">Bienestar México (Mujeres con Bienestar)</option>
                                     <option value="family">Família Beneficiária</option>
                                     <option value="education">Educação</option>
                                     <option value="health">Saúde</option>
@@ -125,7 +421,8 @@ app.get('/', (c) => {
                                 <option value="1:1">Quadrado (1:1) - Instagram Feed</option>
                                 <option value="9:16">Vertical (9:16) - Stories/Reels</option>
                                 <option value="16:9">Horizontal (16:9) - Facebook</option>
-                                <option value="4:3">Retrato (4:3) - Posts</option>
+                                <option value="4:5">Retrato (4:5) - Posts Verticais</option>
+                                <option value="3:2">Paisagem (3:2) - Posts Horizontais</option>
                             </select>
                         </div>
 
@@ -137,6 +434,27 @@ app.get('/', (c) => {
                                 <option value="5">5 imagens</option>
                                 <option value="10">10 imagens (massa)</option>
                             </select>
+                        </div>
+
+                        <!-- Preview do Prompt -->
+                        <div class="mb-4 p-4 bg-white/10 rounded-lg">
+                            <label class="block text-white font-semibold mb-2">📝 Preview do Prompt:</label>
+                            <textarea 
+                                id="prompt-preview"
+                                class="w-full h-20 p-3 text-sm rounded-lg bg-white/20 text-white border border-white/30 resize-none"
+                                placeholder="O prompt será gerado automaticamente baseado nas suas seleções..."
+                                readonly
+                            ></textarea>
+                            <div class="flex justify-between items-center mt-2">
+                                <small class="text-white/60">Você pode editar o prompt antes de gerar</small>
+                                <button 
+                                    onclick="togglePromptEdit()"
+                                    id="edit-prompt-btn"
+                                    class="text-xs bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded"
+                                >
+                                    ✏️ Editar
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Botões -->
@@ -151,25 +469,18 @@ app.get('/', (c) => {
                             
                             <div class="grid grid-cols-2 gap-2">
                                 <button 
-                                    onclick="downloadAllImages()"
+                                    onclick="downloadAllImagesAsZip()"
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
                                 >
-                                    📦 Download Todas
+                                    📦 Download ZIP
                                 </button>
                                 <button 
-                                    onclick="exportPrompts()"
-                                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
+                                    onclick="clearGallery()"
+                                    class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg transition-all text-sm"
                                 >
-                                    📄 Exportar Prompts
+                                    🗑️ Limpar
                                 </button>
                             </div>
-                            
-                            <button 
-                                onclick="clearGallery()"
-                                class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-all"
-                            >
-                                🗑️ Limpar Galeria
-                            </button>
                             
                             <button 
                                 onclick="openConfigModal()"
@@ -244,6 +555,177 @@ app.get('/', (c) => {
                             <li>• Adapte baseado na performance</li>
                         </ul>
                     </div>
+                    </div>
+                </div>
+
+                <!-- Editor Tool -->
+                <div id="editor-tool" class="tool-panel hidden">
+                    <div class="text-center mb-8">
+                        <h2 class="text-3xl font-bold text-white mb-2">✏️ Editor de Imagens</h2>
+                        <p class="text-white/80">Edite e otimize suas imagens para Facebook Ads</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                        <!-- Menu Lateral Esquerdo -->
+                        <div class="lg:col-span-1 space-y-6">
+                            <!-- Origem das Imagens -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-folder mr-2"></i>Origem das Imagens</h3>
+                                
+                                <button id="uploadBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded mb-2 hover:bg-blue-700 transition-all">
+                                    <i class="fas fa-upload mr-2"></i>Upload Local
+                                </button>
+                                
+                                <button id="importBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded mb-4 hover:bg-green-700 transition-all">
+                                    <i class="fas fa-download mr-2"></i>Importar do Gerador
+                                </button>
+                                
+                                <div id="dropArea" class="drag-area p-8 text-center rounded border-2 border-dashed border-white/30 bg-white/5">
+                                    <i class="fas fa-cloud-upload-alt text-4xl text-white/40 mb-2"></i>
+                                    <p class="text-white/70">Arraste imagens aqui ou clique para selecionar</p>
+                                    <input type="file" id="fileInput" multiple accept="image/*" class="hidden">
+                                </div>
+                            </div>
+
+                            <!-- Formato de Saída -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-expand-arrows-alt mr-2"></i>Formato de Saída</h3>
+                                <select id="outputSize" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded">
+                                    <option value="1080x1080">1080×1080 (Facebook padrão)</option>
+                                    <option value="1200x1200">1200×1200 (Facebook HD)</option>
+                                    <option value="1080x1920">1080×1920 (Story)</option>
+                                    <option value="1080x1350">1080×1350 (Instagram Post)</option>
+                                </select>
+                            </div>
+
+                            <!-- Ajuste Quadrado -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-crop-alt mr-2"></i>Ajuste Quadrado</h3>
+                                <select id="squareAdjust" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded mb-3">
+                                    <option value="none">Sem Ajuste</option>
+                                    <option value="crop">Crop Central</option>
+                                    <option value="cover">Cover com Bordas</option>
+                                    <option value="letterbox">Letterbox</option>
+                                    <option value="letterbox-blur">Letterbox + Blur</option>
+                                </select>
+                            </div>
+
+                            <!-- Controles de Blur -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-adjust mr-2"></i>Blur</h3>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-white/70">0</span>
+                                    <input type="range" id="blurSlider" min="0" max="25" value="0" class="flex-1">
+                                    <span class="text-white/70">25</span>
+                                </div>
+                                <span id="blurValue" class="text-sm text-white/60">Blur: 0px</span>
+                            </div>
+
+                            <!-- Botão Play -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-play mr-2"></i>Botão Play</h3>
+                                
+                                <div class="mb-3">
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" id="enablePlay" class="mr-2">
+                                        <span>Ativar Botão Play</span>
+                                    </label>
+                                </div>
+
+                                <div id="playControls" class="space-y-3 hidden">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Estilo:</label>
+                                        <select id="playStyle" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded">
+                                            <option value="youtube">YouTube Clássico</option>
+                                            <option value="circle">Círculo Moderno</option>
+                                            <option value="square">Quadrado Minimalista</option>
+                                            <option value="gradient">Gradiente</option>
+                                            <option value="neon">Neon</option>
+                                            <option value="black-circle">Círculo Preto</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Tamanho (%): <span id="playSizeValue">40</span></label>
+                                        <input type="range" id="playSize" min="10" max="100" value="40" class="w-full">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Opacidade (%): <span id="playOpacityValue">90</span></label>
+                                        <input type="range" id="playOpacity" min="10" max="100" value="90" class="w-full">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CTA -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-bullhorn mr-2"></i>Call to Action</h3>
+                                
+                                <div class="mb-3">
+                                    <label class="flex items-center text-white">
+                                        <input type="checkbox" id="enableCta" class="mr-2">
+                                        <span>Ativar CTA</span>
+                                    </label>
+                                </div>
+
+                                <div id="ctaControls" class="space-y-3 hidden">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Texto:</label>
+                                        <input type="text" id="ctaText" placeholder="Baixe agora!" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded placeholder-white/50">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Posição:</label>
+                                        <select id="ctaPosition" class="w-full p-2 border border-white/30 bg-white/20 text-white rounded">
+                                            <option value="bottom">Inferior</option>
+                                            <option value="center">Centro</option>
+                                            <option value="top">Superior</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1 text-white/80">Opacidade Fundo (%): <span id="ctaOpacityValue">80</span></label>
+                                        <input type="range" id="ctaOpacity" min="30" max="100" value="80" class="w-full">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Área Central -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Imagens Carregadas -->
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-images mr-2"></i>Imagens Carregadas</h3>
+                                <div id="imageList" class="text-center text-white/60">
+                                    Nenhuma imagem carregada
+                                </div>
+                            </div>
+
+                            <!-- Botão Processar -->
+                            <button id="processBtn" class="w-full bg-green-600 text-white py-4 px-6 rounded-lg text-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all">
+                                <i class="fas fa-cogs mr-2"></i>Processar Lote
+                            </button>
+
+                            <!-- Progress -->
+                            <div id="progressArea" class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 hidden">
+                                <h3 class="text-lg font-semibold mb-3 text-white">Progresso</h3>
+                                <div class="w-full bg-white/20 rounded-full h-2.5 mb-2">
+                                    <div id="progressBar" class="bg-green-600 h-2.5 rounded-full transition-all" style="width: 0%"></div>
+                                </div>
+                                <p id="progressText" class="text-sm text-white/70">Preparando...</p>
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20 sticky top-24">
+                                <h3 class="text-lg font-semibold mb-3 text-white"><i class="fas fa-eye mr-2"></i>Preview</h3>
+                                <div id="previewArea" class="text-center text-white/60 min-h-64 flex items-center justify-center border-2 border-dashed border-white/20 rounded bg-white/5">
+                                    Selecione uma imagem para ver o preview
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -270,6 +752,16 @@ app.get('/', (c) => {
                         <div class="mb-6">
                             <label class="block text-white font-semibold mb-3">Escolha sua API de IA:</label>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <button 
+                                    class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left border-green-500 bg-green-500/20"
+                                    data-provider="pollinations"
+                                    onclick="selectAPIProvider('pollinations')"
+                                >
+                                    <div class="font-bold text-white">🆓 Pollinations AI</div>
+                                    <div class="text-sm text-white/70">100% GRATUITO • Sem limites</div>
+                                    <div class="text-xs text-white/60 mt-1">Flux + Stable Diffusion</div>
+                                </button>
+                                
                                 <button 
                                     class="api-provider-btn p-4 rounded-lg border-2 transition-all text-left"
                                     data-provider="ideogram"
@@ -418,10 +910,10 @@ app.get('/', (c) => {
                         <div class="mt-6 p-4 bg-green-500/20 rounded-lg border border-green-500/30">
                             <h5 class="text-green-200 font-semibold mb-2">💡 Recomendações</h5>
                             <ul class="text-green-100/80 text-sm space-y-1">
-                                <li>• <strong>Para começar:</strong> Use Ideogram (melhor qualidade)</li>
-                                <li>• <strong>Para economia:</strong> Use Flux Pro (rápido e barato)</li>
-                                <li>• <strong>Para premium:</strong> Use DALL-E 3 (OpenAI)</li>
-                                <li>• <strong>Todas funcionam:</strong> Escolha baseado no seu orçamento</li>
+                                <li>• <strong>🆓 Para começar:</strong> Use Pollinations (100% gratuito)</li>
+                                <li>• <strong>🏆 Para qualidade máxima:</strong> Use Ideogram (melhor resultado)</li>
+                                <li>• <strong>⚡ Para economia:</strong> Use Flux Pro (rápido e barato)</li>
+                                <li>• <strong>🤖 Para premium:</strong> Use DALL-E 3 (OpenAI)</li>
                             </ul>
                         </div>
 
@@ -450,27 +942,47 @@ app.get('/', (c) => {
 app.post('/api/generate', async (c) => {
   try {
     const { env } = c // Acessar variáveis de ambiente no Cloudflare
-    const { category, nationality, style, socialTheme, aspectRatio, quantity, userAPIConfig } = await c.req.json()
+    const { category, nationality, style, socialTheme, aspectRatio, quantity, userAPIConfig, customPrompt } = await c.req.json()
     
     // Validar limites
     if (quantity > 10) {
       return c.json({ success: false, error: 'Maximum 10 images per request' }, 400)
     }
 
+    // Usar prompt customizado se fornecido, senão gerar automaticamente
     let basePrompt = ''
-    if (category === 'women') {
-      const womanType = WOMAN_TYPES[nationality] || WOMAN_TYPES.brazilian
-      const styleDesc = STYLES[style] || STYLES.casual
-      basePrompt = `${womanType}, ${styleDesc}, professional photography, high quality, detailed, beautiful lighting, 4k resolution`
-    } else if (category === 'social') {
-      const theme = SOCIAL_BENEFIT_THEMES[socialTheme] || SOCIAL_BENEFIT_THEMES.housing
-      
-      if (socialTheme === 'housing') {
-        basePrompt = `Brazilian social housing program, new small houses in rows, happy Brazilian families in front of their new houses, children playing, adults smiling, government housing project, affordable housing complex, clean modern houses with red tile roofs, families holding keys, celebrating homeownership, bright sunny day, professional photography, high quality, realistic, documentary style, 4k resolution`
-      } else if (socialTheme === 'family') {
-        basePrompt = `Happy Brazilian family with children, parents and kids together, smiling and celebrating, in front of a new house, social program beneficiaries, diverse Brazilian family, joy and happiness, new home celebration, professional photography, high quality, realistic, warm lighting, 4k resolution`
-      } else {
-        basePrompt = `${theme}, Brazilian social programs, community development, inspiring, positive impact, professional photography, high quality, meaningful, uplifting, realistic, 4k resolution`
+    
+    if (customPrompt && customPrompt.trim()) {
+      basePrompt = customPrompt.trim()
+    } else {
+      if (category === 'women') {
+        const womanType = WOMAN_TYPES[nationality] || WOMAN_TYPES.brazilian
+        const styleDesc = STYLES[style] || STYLES.casual
+        
+        let additionalDesc = ''
+        if (style === 'sexy' || style === 'seductive') {
+          additionalDesc = ', attractive pose, confident expression, stylish outfit with subtle elegance, charming smile'
+        } else if (style === 'glamour') {
+          additionalDesc = ', glamorous makeup, elegant hairstyle, sophisticated fashion, model-like pose, stunning appearance'
+        } else if (style === 'bikini') {
+          additionalDesc = ', beach fashion, summer style, confident pose, tropical setting, vacation vibes'
+        } else if (style === 'trendy') {
+          additionalDesc = ', modern fashion, contemporary style, trendy accessories, stylish pose, urban chic'
+        }
+        
+        basePrompt = `${womanType}, ${styleDesc}${additionalDesc}, professional photography, high quality, detailed, beautiful lighting, 4k resolution`
+      } else if (category === 'social') {
+        const theme = SOCIAL_BENEFIT_THEMES[socialTheme] || SOCIAL_BENEFIT_THEMES.housing
+        
+        if (socialTheme === 'housing') {
+          basePrompt = `Brazilian social housing program, new small houses in rows, happy Brazilian families in front of their new houses, children playing, adults smiling, government housing project, affordable housing complex, clean modern houses with red tile roofs, families holding keys, celebrating homeownership, bright sunny day, professional photography, high quality, realistic, documentary style, 4k resolution`
+        } else if (socialTheme === 'bienestar') {
+          basePrompt = `Single Mexican woman beneficiary of Bienestar México program, Mujeres con Bienestar, happy Mexican mother holding social welfare card, government support program, woman with traditional Mexican clothing, colorful social program banner in background, official government setting, positive social impact, realistic Mexican woman, professional photography, high quality, bright lighting, documentary style, 4k resolution`
+        } else if (socialTheme === 'family') {
+          basePrompt = `Brazilian couple with maximum two children, father and mother with one son and one daughter, small happy family of four people total, parents and two kids celebrating new home, Minha Casa Minha Vida program beneficiaries, family portrait in front of new house, joy and happiness, realistic Brazilian family, professional photography, high quality, warm lighting, 4k resolution`
+        } else {
+          basePrompt = `${theme}, Brazilian social programs, community development, inspiring, positive impact, professional photography, high quality, meaningful, uplifting, realistic, 4k resolution`
+        }
       }
     }
 
@@ -489,28 +1001,74 @@ app.post('/api/generate', async (c) => {
         ', Brazilian family with "Minha Casa Minha Vida" signage visible',
         ', families moving into new houses, boxes and celebration'
       ]
+    } else if (category === 'social' && socialTheme === 'bienestar') {
+      variations = [
+        ', Mexican woman proudly showing her Bienestar card at government office',
+        ', single Mexican mother smiling with social welfare card in hand',
+        ', Mexican woman in traditional dress holding government support card',
+        ', woman standing in front of Bienestar México banner at official event',
+        ', Mexican mother with one child receiving government assistance',
+        ', woman beneficiary portrait at Mujeres con Bienestar ceremony',
+        ', Mexican woman celebrating social program benefits with government official',
+        ', elderly Mexican woman smiling while holding her benefit card'
+      ]
     } else if (category === 'social' && socialTheme === 'family') {
       variations = [
-        ', Brazilian mother with children smiling in front of house',
-        ', father and mother with kids celebrating new home',
-        ', multi-generational Brazilian family, grandparents to children',
-        ', family portrait with house in background',
-        ', children playing while parents watch from new house',
-        ', family embracing in front of their new home',
-        ', parents lifting children in celebration of new house',
-        ', extended family gathering at new house celebration'
+        ', Brazilian mother and father with one son and one daughter smiling in front of house',
+        ', couple with maximum two children celebrating new home together',
+        ', family of four people total, parents with boy and girl, house keys in hand',
+        ', family portrait with mother, father and exactly two kids, house in background',
+        ', two children playing while parents watch from new house doorway',
+        ', small family of four embracing in front of their new home',
+        ', parents with son and daughter only, all holding house keys together',
+        ', couple with two children maximum, family photo celebrating new house'
       ]
     } else if (category === 'women') {
-      variations = [
-        ', smiling naturally, bright eyes',
-        ', confident pose, professional lighting',
-        ', elegant composition, soft focus background', 
-        ', warm golden lighting, natural expression',
-        ', dynamic pose, vibrant colors',
-        ', candid moment, authentic smile',
-        ', artistic angle, dramatic lighting',
-        ', lifestyle photography, relaxed atmosphere'
-      ]
+      if (style === 'sexy' || style === 'seductive') {
+        variations = [
+          ', alluring gaze, confident expression, stylish pose',
+          ', charming smile, attractive styling, elegant composition',
+          ', seductive look, fashionable outfit, professional modeling',
+          ', captivating pose, beautiful makeup, stunning appearance',
+          ', confident attitude, stylish clothing, magnetic presence',
+          ', elegant sensuality, sophisticated style, artistic photography',
+          ', attractive fashion, charismatic pose, beautiful lighting',
+          ', enchanting smile, trendy outfit, glamorous appearance'
+        ]
+      } else if (style === 'glamour') {
+        variations = [
+          ', glamorous makeup, luxury fashion, model pose, studio lighting',
+          ', elegant hairstyle, designer outfit, sophisticated expression',
+          ', high fashion style, professional model pose, dramatic lighting',
+          ', stunning beauty, luxury accessories, magazine quality',
+          ', glamour photography, elegant pose, perfect styling',
+          ', fashion model style, luxury setting, professional makeup',
+          ', sophisticated glamour, designer clothing, artistic composition',
+          ', elegant beauty, high-end fashion, studio photography'
+        ]
+      } else if (style === 'bikini') {
+        variations = [
+          ', beach bikini, tropical setting, summer vibes, confident pose',
+          ', swimwear fashion, ocean background, vacation style, sunny day',
+          ', beach photography, bikini model, coastal setting, natural beauty',
+          ', summer fashion, beachwear style, tropical paradise, relaxed pose',
+          ', bikini photoshoot, beach lifestyle, summer elegance, ocean vibes',
+          ', swimwear modeling, beach scene, vacation photography, sunny atmosphere',
+          ', coastal beauty, bikini fashion, beach setting, summer glow',
+          ', tropical bikini, beach paradise, summer style, vacation mood'
+        ]
+      } else {
+        variations = [
+          ', smiling naturally, bright eyes, professional pose',
+          ', confident expression, beautiful styling, elegant composition',
+          ', natural beauty, authentic smile, artistic photography', 
+          ', warm lighting, genuine expression, professional quality',
+          ', dynamic pose, vibrant appearance, magazine style',
+          ', candid moment, charming smile, lifestyle photography',
+          ', artistic angle, beautiful lighting, sophisticated pose',
+          ', elegant style, natural grace, professional modeling'
+        ]
+      }
     } else {
       variations = [
         ', inspiring community scene',
@@ -537,8 +1095,11 @@ app.post('/api/generate', async (c) => {
         case '16:9':
           technicalSpecs = ', horizontal composition, landscape orientation, Facebook ad format'
           break
-        case '4:3':
-          technicalSpecs = ', balanced composition, classic portrait ratio'
+        case '4:5':
+          technicalSpecs = ', vertical portrait composition, ideal for posts'
+          break
+        case '3:2':
+          technicalSpecs = ', horizontal landscape composition, professional format'
           break
         default:
           technicalSpecs = ', square composition, Instagram post format'
@@ -548,13 +1109,13 @@ app.post('/api/generate', async (c) => {
     }
 
     // Verificar se há configuração do usuário OU variáveis de ambiente
-    const userHasAPI = userAPIConfig && userAPIConfig.provider && userAPIConfig.apiKey
-    const serverHasAPI = env?.AI_API_PROVIDER && (
+    const userHasAPI = userAPIConfig && userAPIConfig.provider && (userAPIConfig.apiKey || userAPIConfig.provider === 'pollinations')
+    const serverHasAPI = env?.AI_API_PROVIDER === 'pollinations' || (env?.AI_API_PROVIDER && (
       env.IDEOGRAM_API_KEY || 
       env.OPENAI_API_KEY || 
       env.FLUX_API_KEY || 
       env.STABILITY_API_KEY
-    )
+    ))
     
     const useRealAPI = userHasAPI || serverHasAPI
 
