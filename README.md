@@ -1,187 +1,187 @@
-# 🎨 Gerador de Criativos para Meta Ads
+# 🎨 Criativos IA - Meta Ads Studio
 
-## Project Overview
-- **Name**: Gerador de Criativos para Meta Ads
-- **Goal**: Sistema completo de geração de imagens com IA para campanhas no Facebook e Instagram
-- **Features**: Geração de mulheres de diferentes nacionalidades, imagens para benefícios sociais (Minha Casa Minha Vida), configuração de APIs e download em lote
+Sistema completo de geração e edição de criativos para Meta Ads usando Inteligência Artificial.
 
-## URLs
-- **Production**: https://3000-ix26c1zvlwzzljkxj8h4x-6532622b.e2b.dev
-- **API Base**: https://3000-ix26c1zvlwzzljkxj8h4x-6532622b.e2b.dev/api
-- **GitHub**: Em desenvolvimento
+## 🌟 Funcionalidades
 
-## ✅ Recursos Implementados
+### 🖼️ **Gerador de Criativos**
+- **Mulheres de diferentes nacionalidades**: Brasileiras, Árabes, Mexicanas, Americanas, Europeias, Asiáticas
+- **Estilos variados**: Sexy, Sedutora, Glamour, Bikini, Moderna, Casual, Formal, Fitness
+- **Benefício Social**: Minha Casa Minha Vida, Bienestar México, Família, Educação, Saúde
+- **Formatos otimizados**: Instagram Feed, Stories, Facebook, Posts Verticais
+- **Geração em massa**: 1, 3, 5 ou 10 imagens por vez
 
-### 🎯 Funcionalidades Principais
-- **Geração de Mulheres**: 6 nacionalidades (Brasileira, Árabe, Mexicana, Americana, Europeia, Asiática) em 8 estilos (Sexy, Sedutora, Glamour, Bikini, Moderna, Casual, Formal, Fitness)
-- **Benefícios Sociais**: Imagens específicas para "Minha Casa Minha Vida" (Brasil) e "Bienestar México" (Mujeres con Bienestar)
-- **Múltiplos Formatos**: Quadrado (1:1), Vertical (9:16), Horizontal (16:9), Retrato (4:5), Paisagem (3:2)
-- **Geração em Lote**: De 1 a 10 imagens por vez para testes A/B
-- **Preview de Prompt**: Visualização e edição do prompt antes de gerar
-- **Download ZIP**: Baixar todas as imagens geradas em um arquivo compactado com informações detalhadas
+### ✏️ **Editor de Imagens (Página Separada)**
+- **Upload drag & drop**: Arraste e solte imagens
+- **Formatos Facebook**: 1080x1080, 1200x1200, Stories, Instagram
+- **Modos de ajuste**: Cover, Contain, Fill, Crop
+- **Botões Play**: 4 estilos diferentes (YouTube, Círculo, Quadrado, Gradiente)
+- **Download funcional**: Canvas.toBlob() otimizado
+- **Canvas em tempo real**: Preview instantâneo das edições
 
-### ⚙️ Configuração de APIs
-- **🆓 Pollinations AI**: 100% GRATUITO - Sem limites, usando Flux e Stable Diffusion
-- **Ideogram V3**: Melhor qualidade (~$0.08/img)
-- **Flux Pro**: Custo-benefício (~$0.055/img) 
-- **DALL-E 3**: Premium OpenAI (~$0.04-0.12/img)
-- **Stability AI**: Controle avançado (~$0.04/img)
-- **Modo Demo**: Imagens placeholder para teste sem API
+### 📦 **Sistema de Downloads**
+- **Download ZIP**: Todas as imagens em formato compactado
+- **Download individual**: Imagens em alta qualidade
+- **Metadados incluídos**: Informações detalhadas de cada criativo
 
-### 🔧 Funcionalidades Técnicas
-- **Armazenamento Seguro**: APIs armazenadas criptografadas no localStorage
-- **Teste de Conexão**: Validação automática das APIs configuradas
-- **Galeria Interativa**: Visualização, download individual, cópia de prompts
-- **Estatísticas**: Contador de imagens geradas por categoria
-- **Interface Responsiva**: TailwindCSS com design moderno
+## 🔗 URLs
 
-## 📊 Endpoints da API
+### 🎨 **Gerador Principal**
+- **Produção**: https://criativos-ia.pages.dev
+- **Desenvolvimento**: http://localhost:3000
 
-### POST /api/generate
-Gerar imagens com IA ou placeholders
-```json
-{
-  "category": "women|social",
-  "nationality": "brazilian|arabic|mexican|american|european|asian",
-  "style": "sexy|bikini|casual|formal|fitness",
-  "socialTheme": "housing|family|education|health|community", 
-  "aspectRatio": "1:1|9:16|16:9|4:5|3:2",
-  "quantity": 1-10,
-  "customPrompt": "prompt personalizado (opcional)",
-  "userAPIConfig": { "provider": "ideogram", "apiKey": "xxx", "model": "V_3" }
-}
+### 🖼️ **Editor de Imagens**  
+- **Produção**: https://criativos-ia.pages.dev/editor
+- **Desenvolvimento**: http://localhost:3000/editor
+
+## 🏗️ Arquitetura Técnica
+
+### **Backend**
+- **Hono Framework**: Web framework moderno e rápido
+- **Cloudflare Workers**: Runtime serverless na edge
+- **TypeScript**: Tipagem estática e desenvolvimento robusto
+
+### **Frontend**
+- **Vanilla JavaScript**: Performance otimizada
+- **Canvas API**: Edição de imagens em tempo real
+- **TailwindCSS**: Estilização utilitária e responsiva
+- **FontAwesome**: Iconografia profissional
+
+### **Integração IA**
+- **Pollinations AI**: Geração gratuita (padrão)
+- **Ideogram V3**: Qualidade premium para pessoas
+- **Flux Pro**: Melhor custo-benefício
+- **DALL-E 3**: Qualidade OpenAI
+- **Stability AI**: Controle avançado
+
+## 📁 Estrutura do Projeto
+
+```
+criativos-ia/
+├── src/
+│   ├── index.tsx          # Aplicação principal Hono
+│   ├── editor.tsx         # Página do editor (não usado)
+│   ├── ai-integration.ts  # Integração com APIs de IA
+│   └── renderer.tsx       # Renderizador Hono
+├── public/static/
+│   ├── app.js            # JavaScript principal
+│   ├── editor.js         # JavaScript do editor
+│   └── style.css         # Estilos customizados  
+├── wrangler.toml         # Configuração Cloudflare
+├── package.json          # Dependências e scripts
+└── README.md            # Documentação
 ```
 
-### POST /api/test-connection
-Testar configuração de API
-```json
-{
-  "provider": "ideogram|flux|openai|stability",
-  "apiKey": "sua_chave_api",
-  "model": "modelo_específico"
-}
-```
+## 🚀 Como Usar
 
-### GET /api/stats
-Obter estatísticas de uso
-
-## 🏗️ Arquitetura de Dados
-
-### Modelos de Dados
-```typescript
-interface GeneratedImage {
-  id: string
-  prompt: string
-  url: string
-  aspectRatio: string
-  category: 'women' | 'social'
-  nationality?: string
-  style?: string
-  socialTheme?: string
-  timestamp: string
-  downloadUrl: string
-  provider: string
-  model: string
-}
-
-interface APIConfig {
-  provider: 'ideogram' | 'flux' | 'openai' | 'stability'
-  apiKey: string
-  model: string
-  maxImages: number
-  timeout: number
-  savedAt: string
-}
-```
-
-### Armazenamento
-- **Frontend**: localStorage (criptografado) para configurações de API
-- **Modo Demo**: Placeholder images via Picsum Photos
-- **APIs Externas**: Integração com múltiplos provedores de IA
-
-### Fluxo de Dados
-1. **Configuração**: Usuário configura API → Validação → Armazenamento seguro
-2. **Geração**: Seleções → Prompt automático → Edição opcional → Chamada API → Galeria
-3. **Download**: Individual ou ZIP com metadados completos
-
-## 🚀 Guia do Usuário
-
-### 1. Configuração Inicial
-1. Clique em "⚙️ Configurar APIs"
-2. Escolha seu provedor (recomendado: Ideogram para qualidade)
-3. Insira sua chave de API
-4. Teste a conexão
-5. Salve as configurações
-
-### 2. Geração de Imagens
-1. Escolha a categoria (👩 Mulheres ou 🤝 Benefício Social)
-2. Configure nacionalidade/estilo ou tema social
-3. Selecione formato e quantidade
-4. Revise/edite o prompt no preview
+### **1. Gerador de Criativos**
+1. Acesse a página principal
+2. Escolha categoria (Mulheres ou Benefício Social)
+3. Configure nacionalidade/tema e estilo
+4. Selecione formato e quantidade
 5. Clique em "🎨 Gerar Imagens"
+6. Use "📦 Download ZIP" para baixar todas
 
-### 3. Gerenciamento
-- **Visualizar**: Clique na imagem para ver detalhes
-- **Download**: Botão individual ou "📦 Download ZIP" para todas
-- **Copiar Prompt**: Para reutilizar em outras ferramentas
-- **Limpar**: Remover imagens da galeria
+### **2. Editor de Imagens**
+1. Clique em "🖼️ Abrir Editor de Imagens"
+2. Faça upload ou arraste imagens
+3. Selecione formato de saída desejado
+4. Configure modo de ajuste
+5. Adicione botão play se necessário
+6. Clique em "Download" para salvar
 
-## 🔄 Atualizações Recentes (31/08/2025)
+## ⚙️ Configuração de APIs
 
-### ✅ Atualizações Recentes - Prompts Melhorados e Correções
-1. **✅ Novos Estilos Femininos**: Adicionados estilos "Sedutora", "Glamour" e "Moderna"
-2. **✅ Prompts Mais Atraentes**: Descrições otimizadas para fotos sensuais (respeitando políticas)
-3. **✅ Variações Específicas**: Cada estilo tem 8 variações únicas e personalizadas
-4. **✅ Botão APIs Corrigido**: Modal de configuração funcionando com debug melhorado
-5. **✅ Download ZIP Simplificado**: Nova implementação mais estável e compatível
+O sistema suporta múltiplas APIs de IA:
 
-### ✅ Nova Funcionalidade - Pollinations AI (GRATUITO)
-1. **✅ API 100% Gratuita**: Integração com Pollinations AI - sem custo, sem limites
-2. **✅ Modelos Avançados**: Flux, Stable Diffusion e Turbo disponíveis
-3. **✅ Fácil Configuração**: Não precisa de API key, funciona imediatamente
-4. **✅ Qualidade Excelente**: Resultados profissionais para Meta Ads
+1. **Pollinations AI** (Gratuito) - Padrão ativo
+2. **Ideogram V3** - Melhor para pessoas (configure API key)
+3. **Flux Pro** - Custo-benefício (configure API key)
+4. **DALL-E 3** - Premium OpenAI (configure API key)
+5. **Stability AI** - Controle avançado (configure API key)
 
-### ✅ Nova Funcionalidade - Bienestar México
-1. **✅ Programa Social Mexicano**: Adicionada opção "Bienestar México (Mujeres con Bienestar)"
-2. **✅ Prompts Específicos**: Geração focada em mulheres mexicanas beneficiárias (1 pessoa por imagem)
-3. **✅ Contextualização Cultural**: Roupas tradicionais, cerimônias oficiais, cartões de benefício
-4. **✅ Variações Temáticas**: 8 variações específicas do programa social mexicano
+## 🛠️ Desenvolvimento
 
-## 🔄 Correções Anteriores (31/08/2025)
+### **Instalação**
+```bash
+npm install
+```
 
-### ✅ Correções Implementadas
-1. **✅ Botão "Configurar APIs"**: Corrigido problema de modal não abrir
-2. **✅ Preview de Prompt**: Implementada visualização e edição inline (removido botão export desnecessário)
-3. **✅ Download ZIP**: Funcionalidade completamente reformulada com JSZip e tratamento de erros
-4. **✅ Prompts de Família**: Corrigidos para gerar máximo 1 casal + 2 filhos (total 4 pessoas)
-5. **✅ Aspectos Suportados**: Removido 4:3, adicionado 4:5 e 3:2 compatíveis com APIs
+### **Desenvolvimento Local**
+```bash
+npm run dev
+# Acesse: http://localhost:3000
+```
 
-### 🔧 Melhorias Técnicas
-- Validação aprimorada de elementos DOM
-- Tratamento robusto de erros no download ZIP
-- Carregamento dinâmico da biblioteca JSZip
-- Prompts mais específicos para famílias brasileiras
-- Compatibilidade com formatos aceitos pelas APIs de IA
+### **Build**
+```bash
+npm run build
+```
 
-## 🛠️ Deployment
-- **Platform**: Cloudflare Pages
-- **Status**: ✅ Ativo e Funcionando
-- **Tech Stack**: Hono + TypeScript + TailwindCSS + Vite
-- **Build**: Automático via Wrangler
-- **Last Updated**: 31 de agosto de 2025
+### **Deploy Cloudflare Pages**
+```bash
+npm run deploy
+```
 
-## 📈 Próximos Passos
-1. **Integração GitHub**: Configurar repositório e versionamento
-2. **Deploy Production**: Migrar para Cloudflare Pages em produção
-3. **Analytics**: Implementar métricas de uso
-4. **Cache**: Sistema de cache para imagens geradas
-5. **Templates**: Prompts salvos e reutilizáveis
-6. **Batch Processing**: Melhorar performance para grandes volumes
+## 📊 Métricas de Performance
 
-## 🏆 Destaques do Sistema
-- **Interface Intuitiva**: Design moderno e responsivo
-- **Flexibilidade**: Suporte a 4 APIs diferentes
-- **Segurança**: Chaves criptografadas no navegador
-- **Eficiência**: Geração em lote e download organizado
-- **Qualidade**: Prompts otimizados para Meta Ads
-- **Escalabilidade**: Arquitetura preparada para crescimento
+- **Tempo de geração**: 3-8 segundos por imagem
+- **Formatos suportados**: PNG, JPG, WebP
+- **Resolução máxima**: 1200x1200px
+- **Download ZIP**: Imagens reais (não placeholders)
+- **Compatibilidade**: Chrome, Firefox, Safari, Edge
+
+## 🎯 Casos de Uso
+
+### **Marketing Digital**
+- Criativos para campanhas Facebook Ads
+- Imagens para Instagram Stories
+- Materiais para anúncios Meta
+
+### **Benefício Social**  
+- Campanhas Minha Casa Minha Vida
+- Materiais Bienestar México
+- Comunicação governamental
+
+### **Teste A/B**
+- Geração de múltiplas variações
+- Comparação de estilos diferentes
+- Otimização de performance
+
+## 🔒 Segurança
+
+- **API Keys**: Armazenamento seguro no localStorage
+- **CORS**: Configuração adequada para APIs externas  
+- **Sanitização**: Validação de inputs do usuário
+- **Rate Limiting**: Controle de uso das APIs
+
+## 📈 Próximas Funcionalidades
+
+- [ ] Integração com Facebook Graph API
+- [ ] Templates predefinidos
+- [ ] Histórico de gerações
+- [ ] Colaboração em equipe
+- [ ] Analytics de performance
+- [ ] Programação de posts
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)  
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+## 🆘 Suporte
+
+- **GitHub Issues**: [https://github.com/r1giandomenico/criativos-ia/issues](https://github.com/r1giandomenico/criativos-ia/issues)
+- **Documentação**: README.md
+- **Deploy Status**: [![Cloudflare Pages](https://img.shields.io/badge/Cloudflare-Pages-orange)](https://criativos-ia.pages.dev)
+
+---
+
+**Desenvolvido com ❤️ para otimizar campanhas Meta Ads através de IA**
