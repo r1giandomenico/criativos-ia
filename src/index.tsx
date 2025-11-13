@@ -1145,41 +1145,81 @@ app.post('/api/generate', async (c) => {
       }
 
       // Gerar imagens com API real
-      for (let i = 0; i < prompts.length; i++) {
-        try {
-          const result = await generateImageWithAI(aiConfig, {
-            prompt: prompts[i],
-            aspectRatio: aspectRatio,
-            model: aiConfig.model
-          })
-
-          if (result.success && result.imageUrl) {
-            results.push({
-              id: `ai_${Date.now()}_${i}`,
-              prompt: prompts[i],
-              url: result.imageUrl,
-              aspectRatio,
-              category,
-              nationality: nationality || 'N/A',
-              style: style || socialTheme || 'N/A',
-              timestamp: new Date().toISOString(),
-              downloadUrl: result.imageUrl,
-              provider: aiConfig.provider,
+      console.log(`Starting generation of ${prompts.length} images with ${aiConfig.provider}`)
+      
+      // Para Pollinations, gerar todas em paralelo (é instantâneo)
+      if (aiConfig.provider === 'pollinations') {
+        const promises = prompts.map(async (prompt, i) => {
+          try {
+            const result = await generateImageWithAI(aiConfig, {
+              prompt,
+              aspectRatio: aspectRatio,
               model: aiConfig.model
             })
-          } else {
-            console.error(`Failed to generate image ${i + 1}:`, result.error)
-            // Continuar com as outras imagens mesmo se uma falhar
-          }
 
-          // Pequeno delay para evitar rate limiting
-          if (i < prompts.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1000))
+            if (result.success && result.imageUrl) {
+              return {
+                id: `ai_${Date.now()}_${i}`,
+                prompt,
+                url: result.imageUrl,
+                aspectRatio,
+                category,
+                nationality: nationality || 'N/A',
+                style: style || socialTheme || 'N/A',
+                timestamp: new Date().toISOString(),
+                downloadUrl: result.imageUrl,
+                provider: aiConfig.provider,
+                model: aiConfig.model
+              }
+            }
+            return null
+          } catch (error) {
+            console.error(`Error generating image ${i + 1}:`, error)
+            return null
           }
+        })
+        
+        const allResults = await Promise.all(promises)
+        results.push(...allResults.filter(r => r !== null))
+        console.log(`Pollinations generated ${results.length}/${prompts.length} images successfully`)
+      } else {
+        // Para outras APIs, gerar sequencialmente com delay
+        for (let i = 0; i < prompts.length; i++) {
+          try {
+            console.log(`Generating image ${i + 1}/${prompts.length}...`)
+            const result = await generateImageWithAI(aiConfig, {
+              prompt: prompts[i],
+              aspectRatio: aspectRatio,
+              model: aiConfig.model
+            })
 
-        } catch (error) {
-          console.error(`Error generating image ${i + 1}:`, error)
-          // Continuar com as outras imagens
+            if (result.success && result.imageUrl) {
+              results.push({
+                id: `ai_${Date.now()}_${i}`,
+                prompt: prompts[i],
+                url: result.imageUrl,
+                aspectRatio,
+                category,
+                nationality: nationality || 'N/A',
+                style: style || socialTheme || 'N/A',
+                timestamp: new Date().toISOString(),
+                downloadUrl: result.imageUrl,
+                provider: aiConfig.provider,
+                model: aiConfig.model
+              })
+              console.log(`Successfully generated image ${i + 1}/${prompts.length}`)
+            } else {
+              console.error(`Failed to generate image ${i + 1}:`, result.error)
+            }
+
+            // Delay para evitar rate limiting
+            if (i < prompts.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000))
+            }
+
+          } catch (error) {
+            console.error(`Error generating image ${i + 1}:`, error)
+          }
         }
       }
 
